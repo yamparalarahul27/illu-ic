@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Agentation } from "agentation";
+import SplashScreen from "@/components/SplashScreen";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,10 +29,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <SplashScreen />
         <header>
           <span className="logo">Crpko Graphics</span>
         </header>
         {children}
+        {process.env.NODE_ENV === "development" && <Agentation />}
       </body>
     </html>
   );
