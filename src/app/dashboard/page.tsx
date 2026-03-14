@@ -14,53 +14,55 @@ function DashboardContent() {
     <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}>
       {/* Top Banner */}
       <div style={{
+        position: "relative",
         width: "100%",
         minHeight: "260px",
-        padding: "48px 64px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         borderRadius: "24px",
-        background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)",
-        backdropFilter: "blur(20px)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        overflow: "hidden",
         marginBottom: "40px",
         boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.05)",
-        gap: "40px"
       }}>
-        <div style={{ flex: 1, zIndex: 10 }}>
+        {/* Background Image spanning the entire layout */}
+        <Image 
+          src="/2.jpeg" 
+          alt="Welcome Graphics Lab Illustration" 
+          fill 
+          style={{ objectFit: "cover", zIndex: 0 }} 
+          priority 
+        />
+        
+        {/* Gradient Overlay for Text Readability */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)",
+          zIndex: 1
+        }} />
+
+        {/* Text Content */}
+        <div style={{ flex: 1, zIndex: 10, padding: "48px 64px", color: "#ffffff" }}>
           <h1 style={{
             fontSize: "42px",
             fontWeight: 700,
             letterSpacing: "-1px",
             margin: "0 0 16px 0",
-            lineHeight: "1.2"
+            lineHeight: "1.2",
+            textShadow: "0 2px 10px rgba(0,0,0,0.5)"
           }}>
             {greeting}
           </h1>
-          <p style={{ fontSize: "16px", opacity: 0.7, maxWidth: "500px", lineHeight: "1.5" }}>
+          <p style={{ 
+            fontSize: "16px", 
+            opacity: 0.9, 
+            maxWidth: "500px", 
+            lineHeight: "1.5", 
+            textShadow: "0 2px 10px rgba(0,0,0,0.5)" 
+          }}>
             Explore your tools and categories below to start creating amazing visual assets.
           </p>
-        </div>
-        
-        {/* Welcome Illustration Image */}
-        <div style={{ 
-          position: "relative", 
-          width: "350px", 
-          height: "350px", 
-          flexShrink: 0, 
-          marginTop: "-60px", 
-          marginBottom: "-60px",
-          marginRight: "-40px",
-          pointerEvents: "none"
-        }}>
-          <Image 
-            src="/welcome-illustration.png" 
-            alt="Welcome Graphics Lab Illustration" 
-            fill 
-            style={{ objectFit: "contain", filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.1))" }} 
-            priority 
-          />
         </div>
       </div>
 
