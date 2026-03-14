@@ -61,7 +61,7 @@ function DashboardContent() {
             lineHeight: "1.5", 
             textShadow: "0 2px 10px rgba(0,0,0,0.5)" 
           }}>
-            Explore your tools and categories below to start creating amazing visual assets.
+            Explore all the illustration of Crpko app here
           </p>
         </div>
       </div>
