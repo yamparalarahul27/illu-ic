@@ -30,7 +30,7 @@ function DashboardContent() {
           src="/2.jpeg" 
           alt="Welcome Graphics Lab Illustration" 
           fill 
-          style={{ objectFit: "cover", objectPosition: "top", zIndex: 0 }} 
+          style={{ objectFit: "cover", objectPosition: "bottom", zIndex: 0 }} 
           priority 
         />
         
