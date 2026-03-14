@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Crpko Graphics",
-  description: "Crpko Graphics",
+  title: "GRAPHICS LAB",
+  description: "GRAPHICS LAB",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
       >
         <SplashScreen />
         <header>
-          <span className="logo">Crpko Graphics</span>
+          <span className="logo">GRAPHICS LAB</span>
         </header>
         {children}
         {process.env.NODE_ENV === "development" && <Agentation />}
