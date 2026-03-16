@@ -139,9 +139,29 @@ function DashboardContent() {
             color: "#000000",
             letterSpacing: "-1px",
             textShadow: "0 2px 10px rgba(255,255,255,0.8)",
-            zIndex: 2
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
           }}>
-            Graphics
+            <span>Graphics</span>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              flexShrink: 0
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
           </h2>
         </div>
 
@@ -192,9 +212,29 @@ function DashboardContent() {
             color: "#000000",
             letterSpacing: "-1px",
             textShadow: "0 2px 10px rgba(255,255,255,0.8)",
-            zIndex: 2
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
           }}>
-            Icons
+            <span>Icons</span>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              flexShrink: 0
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
           </h2>
         </div>
 
