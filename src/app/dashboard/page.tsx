@@ -82,7 +82,7 @@ function DashboardContent() {
           minHeight: "300px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start",
+          justifyContent: "flex-end", // Text back to bottom
           background: "#ffffff", // Changed to white
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -97,18 +97,19 @@ function DashboardContent() {
             fill 
             style={{ 
               objectFit: "contain", 
-              objectPosition: "center", 
+              objectPosition: "top center", // Push up away from the bottom text
               zIndex: 0,
-              transform: "scale(1.2)" // Increases size inside the card
+              paddingBottom: "80px", // Breathing room above the text
+              transform: "scale(0.85)" // Reduces size
             }} 
           />
 
           {/* Glass Overlay for Text Readability */}
           <div style={{
             position: "absolute",
-            top: 0, left: 0, right: 0,
+            bottom: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)",
+            background: "linear-gradient(to top, rgba(255,255,255,0.9), transparent)", // White overlay from bottom
             zIndex: 1
           }} />
           
@@ -135,7 +136,7 @@ function DashboardContent() {
           minHeight: "300px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start",
+          justifyContent: "flex-end", // Text back to bottom
           background: "#ffffff", // Changed to white
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -150,17 +151,18 @@ function DashboardContent() {
             fill 
             style={{ 
               objectFit: "contain", 
-              objectPosition: "center", 
+              objectPosition: "top center", // Push up away from the bottom text
               zIndex: 0,
-              transform: "scale(0.9)" // Reduces size inside the card to accommodate the new asset
+              paddingBottom: "80px", // Breathing room above the text
+              transform: "scale(0.85)" // Reduces size
             }} 
           />
 
           <div style={{
             position: "absolute",
-            top: 0, left: 0, right: 0,
+            bottom: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)",
+            background: "linear-gradient(to top, rgba(255,255,255,0.9), transparent)",
             zIndex: 1
           }} />
           
