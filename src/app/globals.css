@@ -72,3 +72,13 @@ header .logo {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Illustrations Library Custom Components */
+.back-btn:hover {
+  background-color: var(--input-hover) !important;
+}
+
+.search-input:focus {
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
+}

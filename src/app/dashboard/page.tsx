@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -83,77 +84,80 @@ function DashboardContent() {
       }}>
         
         {/* Left Card: Graphics */}
-        <div style={{
-          position: "relative",
-          overflow: "hidden",
-          borderRadius: "20px",
-          padding: "40px",
-          minHeight: "300px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end", // Text back to bottom
-          background: "var(--card-bg)", 
-          boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
-          transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
-          cursor: "pointer",
-        }}
-        className="dashboard-card"
-        >
-          {/* Background Image */}
-          <Image 
-            src="/ill_graphic_card_design.png" 
-            alt="Graphics Card Design" 
-            fill 
-            style={{ 
-              objectFit: "contain", 
-              objectPosition: "center", // Center it to prevent edge cutoffs
-              zIndex: 0,
-              paddingBottom: "40px", // Give it a little push up to avoid text overlapping
-              transform: "scale(1.1)" // Increased by 10%
-            }} 
-          />
-
-          {/* Glass Overlay for Text Readability */}
+        <Link href="/library/illustrations" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column' }}>
           <div style={{
-            position: "absolute",
-            bottom: 0, left: 0, right: 0,
-            padding: "30px 40px",
-            background: "linear-gradient(to top, var(--card-bg), transparent)", 
-            zIndex: 1
-          }} />
-          
-          <h2 style={{
             position: "relative",
-            margin: 0,
-            fontSize: "28px", // Reduced from 36px
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            letterSpacing: "-1px",
-            zIndex: 2,
+            overflow: "hidden",
+            borderRadius: "20px",
+            padding: "40px",
+            minHeight: "300px",
+            height: "100%",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between"
-          }}>
-            <span>Illustrations</span>
+            flexDirection: "column",
+            justifyContent: "flex-end", // Text back to bottom
+            background: "var(--card-bg)", 
+            boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
+            transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
+            cursor: "pointer",
+          }}
+          className="dashboard-card"
+          >
+            {/* Background Image */}
+            <Image 
+              src="/ill_graphic_card_design.png" 
+              alt="Graphics Card Design" 
+              fill 
+              style={{ 
+                objectFit: "contain", 
+                objectPosition: "center", // Center it to prevent edge cutoffs
+                zIndex: 0,
+                paddingBottom: "40px", // Give it a little push up to avoid text overlapping
+                transform: "scale(1.1)" // Increased by 10%
+              }} 
+            />
+
+            {/* Glass Overlay for Text Readability */}
             <div style={{
+              position: "absolute",
+              bottom: 0, left: 0, right: 0,
+              padding: "30px 40px",
+              background: "linear-gradient(to top, var(--card-bg), transparent)", 
+              zIndex: 1
+            }} />
+            
+            <h2 style={{
+              position: "relative",
+              margin: 0,
+              fontSize: "28px", // Reduced from 36px
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              letterSpacing: "-1px",
+              zIndex: 2,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              backgroundColor: "#7c3aed",
-              color: "#ffffff",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              flexShrink: 0
+              justifyContent: "space-between"
             }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </div>
-          </h2>
-        </div>
+              <span>Illustrations</span>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                backgroundColor: "#7c3aed",
+                color: "#ffffff",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                flexShrink: 0
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </div>
+            </h2>
+          </div>
+        </Link>
 
         {/* Right Card: Icons */}
         <div style={{
