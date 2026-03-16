@@ -20,7 +20,7 @@ export default function IllustrationsLibrary() {
   const [illustrations, setIllustrations] = useState<Illustration[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [isLightModeFilter, setIsLightModeFilter] = useState(true);
+  const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("light");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load illustrations from localStorage on mount
@@ -45,7 +45,9 @@ export default function IllustrationsLibrary() {
 
   const filteredIllustrations = illustrations.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesMode = isLightModeFilter 
+    if (filterMode === "all") return matchesSearch;
+    
+    const matchesMode = filterMode === "light" 
       ? item.name.toLowerCase().includes("light")
       : item.name.toLowerCase().includes("dark");
     return matchesSearch && matchesMode;
@@ -164,27 +166,44 @@ export default function IllustrationsLibrary() {
           />
         </div>
 
-        {/* Light/Dark Toggle Filter (Right of Search) */}
+        {/* Light/Dark/All Toggle Filter (Right of Search) */}
         <button
-          onClick={() => setIsLightModeFilter(!isLightModeFilter)}
-          title={isLightModeFilter ? "Switch to Dark illustrations" : "Switch to Light illustrations"}
+          onClick={() => {
+            if (filterMode === "light") setFilterMode("dark");
+            else if (filterMode === "dark") setFilterMode("all");
+            else setFilterMode("light");
+          }}
+          title={
+            filterMode === "light" ? "Switch to Dark illustrations" :
+            filterMode === "dark" ? "Show All illustrations" :
+            "Switch to Light illustrations"
+          }
           style={{
             width: "48px",
             height: "48px",
             borderRadius: "50%",
             border: "1px solid var(--border-color)",
-            backgroundColor: isLightModeFilter ? "#fef3c7" : "#1e1b4b", // Amber-50 vs Indigo-950
-            color: isLightModeFilter ? "#d97706" : "#818cf8", // Amber-600 vs Indigo-400
+            backgroundColor: 
+              filterMode === "light" ? "#fef3c7" : 
+              filterMode === "dark" ? "#1e1b4b" : 
+              "var(--input-bg)",
+            color: 
+              filterMode === "light" ? "#d97706" : 
+              filterMode === "dark" ? "#818cf8" : 
+              "var(--text-secondary)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
             transition: "all 0.3s ease",
             flexShrink: 0,
-            boxShadow: isLightModeFilter ? "0 4px 12px rgba(217, 119, 6, 0.15)" : "0 4px 12px rgba(30, 27, 75, 0.3)"
+            boxShadow: 
+              filterMode === "light" ? "0 4px 12px rgba(217, 119, 6, 0.15)" : 
+              filterMode === "dark" ? "0 4px 12px rgba(30, 27, 75, 0.3)" : 
+              "none"
           }}
         >
-          {isLightModeFilter ? (
+          {filterMode === "light" ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -196,9 +215,16 @@ export default function IllustrationsLibrary() {
               <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
-          ) : (
+          ) : filterMode === "dark" ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          ) : (
+            /* "All" state - standard layers/all icon */
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
             </svg>
           )}
         </button>
