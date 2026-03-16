@@ -23,6 +23,7 @@ export default function IllustrationsLibrary() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("all");
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load illustrations from Supabase on mount
@@ -84,6 +85,7 @@ export default function IllustrationsLibrary() {
       }
 
       const fileName = `${Date.now()}_${file.name}`;
+      setIsLoading(true);
       
       // 1. Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -92,6 +94,7 @@ export default function IllustrationsLibrary() {
 
       if (uploadError) {
         alert(`Upload error: ${uploadError.message}`);
+        setIsLoading(false);
         return;
       }
 
@@ -109,6 +112,7 @@ export default function IllustrationsLibrary() {
         }])
         .select();
 
+      setIsLoading(false);
       if (dbError) {
         alert(`DB error: ${dbError.message}`);
       } else if (dbData) {
@@ -154,8 +158,28 @@ export default function IllustrationsLibrary() {
   };
 
   return (
-    <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px" }}>
-      
+    <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px", position: "relative" }}>
+      {isLoading && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.4)",
+          backdropFilter: "blur(8px)",
+          zIndex: 9999,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "24px"
+        }}>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div className="loader-circle" style={{ backgroundColor: "#7c3aed", animationDelay: "0s" }}></div>
+            <div className="loader-circle" style={{ backgroundColor: "#a78bfa", animationDelay: "0.2s" }}></div>
+            <div className="loader-circle" style={{ backgroundColor: "#ddd6fe", animationDelay: "0.4s" }}></div>
+          </div>
+          <p style={{ color: "#ffffff", fontWeight: 600, fontSize: "18px", margin: 0, letterSpacing: "0.5px" }}>Uploading Illustration...</p>
+        </div>
+      )}
       {/* Side Panel Integration */}
       <IllustrationSidePanel 
         illustration={selectedIllustration} 
@@ -436,6 +460,18 @@ export default function IllustrationsLibrary() {
           main > div:first-of-type {
             top: 64px; /* Adjust for taller header on larger screens */
           }
+        }
+
+        .loader-circle {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          animation: pulse 1.2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+          0%, 100% { transform: scale(0.8); opacity: 0.4; }
+          50% { transform: scale(1.2); opacity: 1; }
         }
       `}} />
     </main>
