@@ -26,7 +26,7 @@ function DashboardContent() {
     }
   }, [nameParam]);
 
-  const greeting = mounted && displayName ? `Hi ${displayName}! Welcome to Graphics Lab.` : `Hi! Welcome to Graphics Lab.`;
+  const greetingPrefix = mounted && displayName ? `Hi ${displayName}! Welcome to ` : `Hi! Welcome to `;
 
   return (
     <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px", fontFamily: "Helvetica, Arial, sans-serif" }}>
@@ -53,23 +53,24 @@ function DashboardContent() {
         />
 
         {/* Text Content */}
-        <div style={{ flex: 1, zIndex: 10, padding: "48px 64px", color: "#ffffff" }}>
+        <div style={{ flex: 1, zIndex: 10, padding: "48px 64px", color: "#000000" }}>
           <h1 style={{
             fontSize: "42px",
             fontWeight: 700,
             letterSpacing: "-1px",
             margin: "0 0 16px 0",
             lineHeight: "1.2",
-            textShadow: "0 2px 10px rgba(0,0,0,0.5)"
+            textShadow: "0 2px 15px rgba(255,255,255,0.8)"
           }}>
-            {greeting}
+            {greetingPrefix}
+            <span style={{ color: "#7c3aed" }}>Graphics Lab.</span>
           </h1>
           <p style={{ 
             fontSize: "16px", 
             opacity: 0.9, 
             maxWidth: "500px", 
             lineHeight: "1.5", 
-            textShadow: "0 2px 10px rgba(0,0,0,0.5)" 
+            textShadow: "0 2px 10px rgba(255,255,255,0.8)" 
           }}>
             Explore all the illustration of Crpko app here
           </p>
