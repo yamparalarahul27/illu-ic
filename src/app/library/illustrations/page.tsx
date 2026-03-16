@@ -25,6 +25,8 @@ export default function IllustrationsLibrary() {
   const [isMounted, setIsMounted] = useState(false);
   const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [showUploadWarning, setShowUploadWarning] = useState(false);
+  const [skipUploadWarning, setSkipUploadWarning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load illustrations from Supabase on mount
@@ -79,12 +81,6 @@ export default function IllustrationsLibrary() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate that the file is an SVG
-      if (file.type !== "image/svg+xml" && !file.name.toLowerCase().endsWith(".svg")) {
-        alert("Please upload SVG files only.");
-        return;
-      }
-
       const fileName = `${Date.now()}_${file.name}`;
       setIsLoading(true);
       
@@ -132,6 +128,19 @@ export default function IllustrationsLibrary() {
   };
 
   const triggerFileUpload = () => {
+    const isDonNotShowAgain = localStorage.getItem("graphicsLabSkipUploadWarning") === "true";
+    if (isDonNotShowAgain) {
+      fileInputRef.current?.click();
+    } else {
+      setShowUploadWarning(true);
+    }
+  };
+
+  const handleConfirmUpload = () => {
+    if (skipUploadWarning) {
+      localStorage.setItem("graphicsLabSkipUploadWarning", "true");
+    }
+    setShowUploadWarning(false);
     fileInputRef.current?.click();
   };
 
@@ -170,6 +179,99 @@ export default function IllustrationsLibrary() {
   return (
     <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px", position: "relative" }}>
       {isLoading && <LoadingOverlay message="Uploading Illustration..." />}
+
+      {/* Upload Warning Popup */}
+      {showUploadWarning && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(8px)",
+          zIndex: 9999,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "20px"
+        }}>
+          <div style={{
+            backgroundColor: "var(--background)",
+            padding: "32px",
+            borderRadius: "24px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "24px",
+            border: "1px solid var(--border-color)"
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ 
+                width: "64px", 
+                height: "64px", 
+                backgroundColor: "#fef3c7", 
+                borderRadius: "50%", 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center",
+                margin: "0 auto 16px",
+                color: "#d97706"
+              }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 8px 0", color: "var(--text-primary)" }}>Upload Tips</h3>
+              <p style={{ fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.5", margin: 0 }}>
+                Upload in <b>SVG</b> for higher resolution images and better scalability.
+              </p>
+            </div>
+
+            <label style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "10px", 
+              cursor: "pointer",
+              fontSize: "14px",
+              color: "var(--text-secondary)",
+              userSelect: "none"
+            }}>
+              <input 
+                type="checkbox" 
+                checked={skipUploadWarning}
+                onChange={(e) => setSkipUploadWarning(e.target.checked)}
+                style={{ width: "18px", height: "18px", accentColor: "#7c3aed", cursor: "pointer" }}
+              />
+              Don't show me again
+            </label>
+
+            <button 
+              onClick={handleConfirmUpload}
+              style={{
+                width: "100%",
+                height: "48px",
+                backgroundColor: "#7c3aed",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "16px",
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "background-color 0.2s ease",
+                boxShadow: "0 4px 12px rgba(124,58,237,0.3)"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6d28d9"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#7c3aed"}
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Side Panel Integration */}
       <IllustrationSidePanel 
         illustration={selectedIllustration} 
@@ -178,7 +280,7 @@ export default function IllustrationsLibrary() {
       />
       <input 
         type="file" 
-        accept=".svg,image/svg+xml" 
+        accept="image/*" 
         ref={fileInputRef} 
         onChange={handleFileUpload} 
         style={{ display: "none" }} 
