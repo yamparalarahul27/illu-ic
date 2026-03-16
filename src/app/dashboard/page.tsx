@@ -97,10 +97,9 @@ function DashboardContent() {
             fill 
             style={{ 
               objectFit: "contain", 
-              objectPosition: "top center", // Push up away from the bottom text
+              objectPosition: "center 10%", // Keep it anchored higher up relative to center
               zIndex: 0,
-              paddingBottom: "80px", // Breathing room above the text
-              transform: "scale(0.85)" // Reduces size
+              transform: "scale(1.15)" // Give it size but push it upwards
             }} 
           />
 
@@ -151,10 +150,9 @@ function DashboardContent() {
             fill 
             style={{ 
               objectFit: "contain", 
-              objectPosition: "top center", // Push up away from the bottom text
+              objectPosition: "center 10%", // Keep it anchored higher up relative to center
               zIndex: 0,
-              paddingBottom: "80px", // Breathing room above the text
-              transform: "scale(0.85)" // Reduces size
+              transform: "scale(1.15)" // Give it size but push it upwards
             }} 
           />
 
