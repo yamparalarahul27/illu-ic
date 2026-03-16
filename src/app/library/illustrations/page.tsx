@@ -20,6 +20,7 @@ export default function IllustrationsLibrary() {
   const [illustrations, setIllustrations] = useState<Illustration[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLightModeFilter, setIsLightModeFilter] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load illustrations from localStorage on mount
@@ -42,9 +43,13 @@ export default function IllustrationsLibrary() {
     }
   }, [illustrations, isMounted]);
 
-  const filteredIllustrations = illustrations.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredIllustrations = illustrations.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesMode = isLightModeFilter 
+      ? item.name.toLowerCase().includes("light")
+      : item.name.toLowerCase().includes("dark");
+    return matchesSearch && matchesMode;
+  });
 
   const selectedIllustration = illustrations.find(i => i.id === selectedId) || null;
 
@@ -156,9 +161,47 @@ export default function IllustrationsLibrary() {
               outline: "none",
               transition: "border-color 0.2s ease, box-shadow 0.2s ease",
             }}
-            className="search-input"
           />
         </div>
+
+        {/* Light/Dark Toggle Filter (Right of Search) */}
+        <button
+          onClick={() => setIsLightModeFilter(!isLightModeFilter)}
+          title={isLightModeFilter ? "Switch to Dark illustrations" : "Switch to Light illustrations"}
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            border: "1px solid var(--border-color)",
+            backgroundColor: isLightModeFilter ? "#fef3c7" : "#1e1b4b", // Amber-50 vs Indigo-950
+            color: isLightModeFilter ? "#d97706" : "#818cf8", // Amber-600 vs Indigo-400
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            flexShrink: 0,
+            boxShadow: isLightModeFilter ? "0 4px 12px rgba(217, 119, 6, 0.15)" : "0 4px 12px rgba(30, 27, 75, 0.3)"
+          }}
+        >
+          {isLightModeFilter ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          )}
+        </button>
 
         {/* Upload Button (Right) */}
         <button
