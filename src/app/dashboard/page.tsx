@@ -96,9 +96,10 @@ function DashboardContent() {
             alt="Graphics Card Design" 
             fill 
             style={{ 
-              objectFit: "cover", 
-              objectPosition: "center -5px", 
-              zIndex: 0 
+              objectFit: "contain", 
+              objectPosition: "center", 
+              zIndex: 0,
+              padding: "20px" // Add a little padding so it doesn't touch the edges
             }} 
           />
 
