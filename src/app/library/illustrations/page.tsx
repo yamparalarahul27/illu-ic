@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import IllustrationSidePanel from "@/components/IllustrationSidePanel";
 
 // Interface for Illustration objects
 interface Illustration {
@@ -16,22 +17,51 @@ const INITIAL_ILLUSTRATIONS: Illustration[] = [];
 
 export default function IllustrationsLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [illustrations, setIllustrations] = useState(INITIAL_ILLUSTRATIONS);
+  const [illustrations, setIllustrations] = useState<Illustration[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load illustrations from localStorage on mount
+  useEffect(() => {
+    setIsMounted(true);
+    const stored = localStorage.getItem("graphicsLabIllustrations");
+    if (stored) {
+      try {
+        setIllustrations(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse stored illustrations", e);
+      }
+    }
+  }, []);
+
+  // Save illustrations to localStorage whenever they change
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem("graphicsLabIllustrations", JSON.stringify(illustrations));
+    }
+  }, [illustrations, isMounted]);
 
   const filteredIllustrations = illustrations.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const selectedIllustration = illustrations.find(i => i.id === selectedId) || null;
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const newIllustration = {
-        id: Date.now(),
-        name: file.name.split('.').slice(0, -1).join('.') || file.name,
-        image: URL.createObjectURL(file)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        const newIllustration: Illustration = {
+          id: Date.now(),
+          name: file.name.split('.').slice(0, -1).join('.') || file.name,
+          image: base64
+        };
+        setIllustrations([newIllustration, ...illustrations]);
       };
-      setIllustrations([newIllustration, ...illustrations]);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -42,7 +72,11 @@ export default function IllustrationsLibrary() {
   return (
     <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px" }}>
       
-      {/* Hidden file input */}
+      {/* Side Panel Integration */}
+      <IllustrationSidePanel 
+        illustration={selectedIllustration} 
+        onClose={() => setSelectedId(null)} 
+      />
       <input 
         type="file" 
         accept="image/*" 
@@ -173,6 +207,7 @@ export default function IllustrationsLibrary() {
           filteredIllustrations.map((illustration) => (
             <div 
               key={illustration.id}
+              onClick={() => setSelectedId(illustration.id)}
               style={{
                 position: "relative",
                 aspectRatio: "1 / 1",
