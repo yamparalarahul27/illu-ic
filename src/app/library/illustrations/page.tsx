@@ -22,7 +22,7 @@ export default function IllustrationsLibrary() {
   const [illustrations, setIllustrations] = useState<Illustration[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("light");
+  const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load illustrations from Supabase on mount
