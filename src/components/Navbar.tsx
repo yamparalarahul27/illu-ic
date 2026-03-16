@@ -100,7 +100,9 @@ export default function Navbar() {
 
   return (
     <>
-      <header style={{ justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000 }}>
+      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000, padding: "0 20px" }}>
+        
+        {/* Left Section: Logo & Toggle */}
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <span className="logo">GRAPHICS LAB</span>
           
@@ -118,7 +120,8 @@ export default function Navbar() {
                 transition: "background-color 0.3s ease",
                 display: "flex",
                 alignItems: "center",
-                padding: "2px"
+                padding: "2px",
+                flexShrink: 0
               }}
             >
               <div style={{
@@ -136,6 +139,7 @@ export default function Navbar() {
           )}
         </div>
         
+        {/* Right Section: Profile Icon */}
         {mounted && displayName && (
           <div 
             onClick={() => setIsSidebarOpen(true)}
