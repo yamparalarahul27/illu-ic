@@ -259,18 +259,20 @@ export default function Navbar() {
                 style={{ 
                   background: "none", 
                   border: "none", 
-                  fontSize: "16px", 
                   cursor: "pointer", 
                   color: "var(--text-primary)",
-                  fontWeight: 600,
                   display: "flex",
                   alignItems: "center",
-                  padding: 0
+                  justifyContent: "center",
+                  padding: "4px"
                 }}
               >
-                &lt; Back
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
               </button>
-              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", flex: 1, textAlign: "center", paddingRight: "44px" }}>Profile</h3>
+              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", flex: 1, textAlign: "center", paddingRight: "28px" }}>Profile</h3>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: 1, overflowY: "auto" }}>
