@@ -118,7 +118,7 @@ function DashboardContent() {
               objectPosition: "center", // Center it to prevent edge cutoffs
               zIndex: 0,
               paddingBottom: "40px", // Give it a little push up to avoid text overlapping
-              transform: "scale(1.0)" // Reduce scale back down so it fits perfectly
+              transform: "scale(1.1)" // Increased by 10%
             }} 
           />
 
@@ -172,7 +172,7 @@ function DashboardContent() {
               objectPosition: "center", // Center it to prevent edge cutoffs
               zIndex: 0,
               paddingBottom: "40px", // Give it a little push up to avoid text overlapping
-              transform: "scale(1.0)" // Reduce scale back down so it fits perfectly
+              transform: "scale(1.1)" // Increased by 10%
             }} 
           />
 
