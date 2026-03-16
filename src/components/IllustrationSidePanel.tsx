@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 interface Illustration {
   id: number;
   name: string;
   image: string;
+  image_url?: string;
 }
 
 interface Comment {
   id: number;
-  userName: string;
-  userEmail: string;
-  userTeam: string;
+  illustration_id: number;
+  user_name: string;
+  user_email: string;
+  user_team: string;
   text: string;
   timestamp: number;
 }
@@ -36,29 +39,39 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
 
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
 
-  // Load user info and bookmarks/comments from localStorage
+  // Load user info and bookmarks/comments
   useEffect(() => {
     if (illustration) {
-      // User Info
+      // User Info (Keep local)
       const storedUser = localStorage.getItem("graphicsLabCommentUser");
       if (storedUser) setUserInfo(JSON.parse(storedUser));
 
-      // Bookmarks
+      // Bookmarks (Keep local)
       const storedBookmarks = localStorage.getItem("graphicsLabBookmarks");
       if (storedBookmarks) {
         const bookmarks = JSON.parse(storedBookmarks);
         setIsBookmarked(bookmarks.includes(illustration.id));
       }
 
-      // Comments
-      const storedComments = localStorage.getItem(`graphicsLabComments_${illustration.id}`);
-      if (storedComments) {
-        setComments(JSON.parse(storedComments));
-      } else {
-        setComments([]);
-      }
+      // Fetch Comments from Supabase
+      fetchComments();
     }
   }, [illustration]);
+
+  const fetchComments = async () => {
+    if (!illustration) return;
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('illustration_id', illustration.id)
+      .order('timestamp', { ascending: false });
+
+    if (error) {
+      console.error("Error fetching comments:", error);
+    } else if (data) {
+      setComments(data);
+    }
+  };
 
   if (!illustration) return null;
 
@@ -98,7 +111,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     const canvas = document.createElement("canvas");
     const img = new window.Image();
     img.crossOrigin = "anonymous";
-    img.src = illustration.image;
+    img.src = illustration.image_url || illustration.image;
     img.onload = () => {
       const scale = parseInt(selectedSize);
       canvas.width = img.width * scale;
@@ -111,11 +124,10 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
         link.href = canvas.toDataURL("image/png");
         link.click();
         
-        // Record download in localStorage
+        // Record download in localStorage (Local history)
         const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
         if (!storedDownloads.some((i: any) => i.id === illustration.id)) {
           localStorage.setItem("graphicsLabDownloaded", JSON.stringify([illustration, ...storedDownloads]));
-          // Trigger storage event for Navbar sync
           window.dispatchEvent(new Event("storage"));
         }
       }
@@ -123,17 +135,19 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
   };
 
   const downloadSVG = () => {
-    if (illustration.image.startsWith("data:image/svg+xml")) {
+    const isSvg = (illustration.image_url && illustration.image_url.toLowerCase().endsWith('.svg')) || 
+                  illustration.image.startsWith("data:image/svg+xml");
+    
+    if (isSvg) {
       const link = document.createElement("a");
       link.download = `${illustration.name}.svg`;
-      link.href = illustration.image;
+      link.href = illustration.image_url || illustration.image;
       link.click();
 
-      // Record download in localStorage
+      // Record download in localStorage (Local history)
       const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
       if (!storedDownloads.some((i: any) => i.id === illustration.id)) {
         localStorage.setItem("graphicsLabDownloaded", JSON.stringify([illustration, ...storedDownloads]));
-        // Trigger storage event for Navbar sync
         window.dispatchEvent(new Event("storage"));
       }
     } else {
@@ -163,23 +177,42 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     setShowCommentPopup(true);
   };
 
-  const handleCommentSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!userInfo) return;
+    if (!userInfo || !illustration) return;
 
-    const updatedComments = editingCommentId !== null 
-      ? comments.map(c => c.id === editingCommentId ? { ...c, text: commentText } : c)
-      : [{
-          id: Date.now(),
-          userName: userInfo.name,
-          userEmail: userInfo.email,
-          userTeam: userInfo.team,
+    if (editingCommentId !== null) {
+      // Update in Supabase
+      const { error } = await supabase
+        .from('comments')
+        .update({ text: commentText })
+        .eq('id', editingCommentId);
+
+      if (error) {
+        alert(`Update error: ${error.message}`);
+        return;
+      }
+    } else {
+      // Insert into Supabase
+      const { error } = await supabase
+        .from('comments')
+        .insert([{
+          illustration_id: illustration.id,
+          user_name: userInfo.name,
+          user_email: userInfo.email,
+          user_team: userInfo.team,
           text: commentText,
           timestamp: Date.now()
-        }, ...comments];
+        }]);
 
-    setComments(updatedComments);
-    localStorage.setItem(`graphicsLabComments_${illustration.id}`, JSON.stringify(updatedComments));
+      if (error) {
+        alert(`Submit error: ${error.message}`);
+        return;
+      }
+    }
+
+    // Refresh comments from DB
+    await fetchComments();
     
     setCommentText("");
     setEditingCommentId(null);
@@ -188,14 +221,17 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     setTimeout(() => setSuccessMessage(""), 3000);
   };
 
-  const handleDeleteComment = (id: number) => {
+  const handleDeleteComment = async (id: number) => {
     if (confirm("Are you sure you want to delete this comment?")) {
-      const updatedComments = comments.filter(c => c.id !== id);
-      setComments(updatedComments);
-      if (updatedComments.length > 0) {
-        localStorage.setItem(`graphicsLabComments_${illustration.id}`, JSON.stringify(updatedComments));
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert(`Delete error: ${error.message}`);
       } else {
-        localStorage.removeItem(`graphicsLabComments_${illustration.id}`);
+        await fetchComments();
       }
     }
   };
@@ -258,7 +294,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
         <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
           {/* Preview */}
           <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", backgroundColor: "var(--card-bg)", borderRadius: "16px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border-color)" }}>
-            <img src={illustration.image} alt={illustration.name} style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain" }} />
+            <img src={illustration.image_url || illustration.image} alt={illustration.name} style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain" }} />
           </div>
 
           {/* Name & Copy */}
@@ -350,8 +386,8 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
                 <div key={comment.id} style={{ backgroundColor: "var(--card-bg)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                     <div>
-                      <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "14px" }}>{comment.userName}</div>
-                      <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{comment.userTeam} • {new Date(comment.timestamp).toLocaleDateString()}</div>
+                      <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "14px" }}>{comment.user_name}</div>
+                      <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{comment.user_team} • {new Date(comment.timestamp).toLocaleDateString()}</div>
                     </div>
                     <div style={{ display: "flex", gap: "8px" }}>
                       <button onClick={() => handleEditComment(comment)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-secondary)" }}>

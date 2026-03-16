@@ -4,12 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import IllustrationSidePanel from "@/components/IllustrationSidePanel";
+import { supabase } from "@/lib/supabase";
 
 // Interface for Illustration objects
 interface Illustration {
   id: number;
   name: string;
   image: string;
+  image_url?: string;
 }
 
 // Mock data for illustrations to populate the grid
@@ -23,25 +25,31 @@ export default function IllustrationsLibrary() {
   const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("light");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load illustrations from localStorage on mount
+  // Load illustrations from Supabase on mount
   useEffect(() => {
     setIsMounted(true);
-    const stored = localStorage.getItem("graphicsLabIllustrations");
-    if (stored) {
-      try {
-        setIllustrations(JSON.parse(stored));
-      } catch (e) {
-        console.error("Failed to parse stored illustrations", e);
-      }
-    }
+    fetchIllustrations();
   }, []);
 
-  // Save illustrations to localStorage whenever they change
-  useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem("graphicsLabIllustrations", JSON.stringify(illustrations));
+  const fetchIllustrations = async () => {
+    const { data, error } = await supabase
+      .from('illustrations')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Error fetching illustrations:", error);
+    } else if (data) {
+      setIllustrations(data);
     }
-  }, [illustrations, isMounted]);
+  };
+
+  // Remove saving to localStorage
+  // useEffect(() => {
+  //   if (isMounted) {
+  //     localStorage.setItem("graphicsLabIllustrations", JSON.stringify(illustrations));
+  //   }
+  // }, [illustrations, isMounted]);
 
   // Sync dark mode class with filterMode
   useEffect(() => {
@@ -66,20 +74,40 @@ export default function IllustrationsLibrary() {
 
   const selectedIllustration = illustrations.find(i => i.id === selectedId) || null;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        const newIllustration: Illustration = {
-          id: Date.now(),
+      const fileName = `${Date.now()}_${file.name}`;
+      
+      // 1. Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('illustrations_storage')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        alert(`Upload error: ${uploadError.message}`);
+        return;
+      }
+
+      // 2. Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('illustrations_storage')
+        .getPublicUrl(fileName);
+
+      // 3. Insert into Database
+      const { data: dbData, error: dbError } = await supabase
+        .from('illustrations')
+        .insert([{ 
           name: file.name.split('.').slice(0, -1).join('.') || file.name,
-          image: base64
-        };
-        setIllustrations([newIllustration, ...illustrations]);
-      };
-      reader.readAsDataURL(file);
+          image_url: publicUrl 
+        }])
+        .select();
+
+      if (dbError) {
+        alert(`DB error: ${dbError.message}`);
+      } else if (dbData) {
+        setIllustrations([dbData[0], ...illustrations]);
+      }
     }
   };
 
@@ -87,25 +115,35 @@ export default function IllustrationsLibrary() {
     fileInputRef.current?.click();
   };
 
-  const handleDeleteIllustration = (id: number) => {
-    // 1. Remove from illustrations state
+  const handleDeleteIllustration = async (id: number) => {
+    // 1. Get the illustration to find its storage path if needed
+    const illustrationToDelete = illustrations.find(i => i.id === id);
+    if (!illustrationToDelete) return;
+
+    // 2. Delete from Supabase Database
+    const { error } = await supabase
+      .from('illustrations')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert(`Error deleting: ${error.message}`);
+      return;
+    }
+
+    // (Optional) We could also delete from storage here if we extract the filename
+    // from the publicUrl, but for simplicity we'll just remove the DB reference.
+    
+    // 3. Update state
     setIllustrations(illustrations.filter(ill => ill.id !== id));
     
-    // 2. Clear associated data in localStorage
-    // Bookmarks
+    // 4. Clear associated local data (Bookmarks/Downloads)
     const storedBookmarks = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
-    const updatedBookmarks = storedBookmarks.filter((bid: number) => bid !== id);
-    localStorage.setItem("graphicsLabBookmarks", JSON.stringify(updatedBookmarks));
+    localStorage.setItem("graphicsLabBookmarks", JSON.stringify(storedBookmarks.filter((bid: number) => bid !== id)));
     
-    // Downloads
     const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
-    const updatedDownloads = storedDownloads.filter((d: any) => d.id !== id);
-    localStorage.setItem("graphicsLabDownloaded", JSON.stringify(updatedDownloads));
+    localStorage.setItem("graphicsLabDownloaded", JSON.stringify(storedDownloads.filter((d: any) => d.id !== id)));
     
-    // Comments
-    localStorage.removeItem(`graphicsLabComments_${id}`);
-    
-    // 3. Trigger storage event for sidebar sync
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -336,7 +374,7 @@ export default function IllustrationsLibrary() {
                 overflow: "hidden"
               }}>
                 <Image 
-                  src={illustration.image} 
+                  src={illustration.image_url || illustration.image} 
                   alt={illustration.name} 
                   fill 
                   style={{ objectFit: "contain", padding: "24px", transition: "transform 0.3s ease" }}
