@@ -87,6 +87,28 @@ export default function IllustrationsLibrary() {
     fileInputRef.current?.click();
   };
 
+  const handleDeleteIllustration = (id: number) => {
+    // 1. Remove from illustrations state
+    setIllustrations(illustrations.filter(ill => ill.id !== id));
+    
+    // 2. Clear associated data in localStorage
+    // Bookmarks
+    const storedBookmarks = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
+    const updatedBookmarks = storedBookmarks.filter((bid: number) => bid !== id);
+    localStorage.setItem("graphicsLabBookmarks", JSON.stringify(updatedBookmarks));
+    
+    // Downloads
+    const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
+    const updatedDownloads = storedDownloads.filter((d: any) => d.id !== id);
+    localStorage.setItem("graphicsLabDownloaded", JSON.stringify(updatedDownloads));
+    
+    // Comments
+    localStorage.removeItem(`graphicsLabComments_${id}`);
+    
+    // 3. Trigger storage event for sidebar sync
+    window.dispatchEvent(new Event("storage"));
+  };
+
   return (
     <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px" }}>
       
@@ -94,6 +116,7 @@ export default function IllustrationsLibrary() {
       <IllustrationSidePanel 
         illustration={selectedIllustration} 
         onClose={() => setSelectedId(null)} 
+        onDelete={handleDeleteIllustration}
       />
       <input 
         type="file" 

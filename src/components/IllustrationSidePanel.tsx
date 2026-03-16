@@ -21,9 +21,10 @@ interface Comment {
 interface IllustrationSidePanelProps {
   illustration: Illustration | null;
   onClose: () => void;
+  onDelete: (id: number) => void;
 }
 
-export default function IllustrationSidePanel({ illustration, onClose }: IllustrationSidePanelProps) {
+export default function IllustrationSidePanel({ illustration, onClose, onDelete }: IllustrationSidePanelProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [selectedSize, setSelectedSize] = useState<"1x" | "2x" | "3x">("1x");
   const [showAuthPopup, setShowAuthPopup] = useState(false);
@@ -205,6 +206,13 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
     setShowCommentPopup(true);
   };
 
+  const handleDeleteIllustration = () => {
+    if (confirm(`Are you sure you want to delete "${illustration.name}" from your library? This action cannot be undone.`)) {
+      onDelete(illustration.id);
+      onClose();
+    }
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -291,6 +299,37 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
               Download as PNG
             </button>
           </div>
+
+          {/* Delete Action */}
+          <button 
+            onClick={handleDeleteIllustration}
+            style={{ 
+              marginTop: "8px",
+              padding: "12px", 
+              borderRadius: "12px", 
+              border: "1px solid #fee2e2", 
+              background: "#fef2f2", 
+              color: "#ef4444", 
+              fontWeight: 600, 
+              cursor: "pointer", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              gap: "8px",
+              transition: "all 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#fee2e2";
+              e.currentTarget.style.borderColor = "#fecaca";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#fef2f2";
+              e.currentTarget.style.borderColor = "#fee2e2";
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            Delete Illustration
+          </button>
 
           {/* Comments Section */}
           <div style={{ marginTop: "16px", borderTop: "1px solid var(--border-color)", paddingTop: "24px" }}>
