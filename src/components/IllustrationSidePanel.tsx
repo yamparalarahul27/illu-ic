@@ -196,7 +196,7 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
           position: "fixed",
           top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: "rgba(0,0,0,0.4)",
-          zIndex: 1500,
+          zIndex: 3000,
           backdropFilter: "blur(4px)",
           transition: "opacity 0.3s ease"
         }}
@@ -208,7 +208,7 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
         top: 0, right: 0, bottom: 0,
         width: "100%", maxWidth: "450px",
         backgroundColor: "var(--background)",
-        zIndex: 1600,
+        zIndex: 3100,
         boxShadow: "-10px 0 30px rgba(0,0,0,0.1)",
         display: "flex",
         flexDirection: "column",
@@ -315,7 +315,7 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
 
       {/* Auth Popup */}
       {showAuthPopup && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 4000, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div style={{ backgroundColor: "var(--background)", padding: "32px", borderRadius: "24px", width: "100%", maxWidth: "400px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
             <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "24px" }}>Verify Identity</h3>
             <form onSubmit={handleAuthSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -330,7 +330,7 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
 
       {/* Comment Popup */}
       {showCommentPopup && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 4000, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div style={{ backgroundColor: "var(--background)", padding: "32px", borderRadius: "24px", width: "100%", maxWidth: "500px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
             <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "24px" }}>{editingCommentId ? "Edit Comment" : "Add Comment"}</h3>
             <form onSubmit={handleCommentSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
