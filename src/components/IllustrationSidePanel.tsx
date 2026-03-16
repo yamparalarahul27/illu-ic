@@ -89,6 +89,8 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
     }
     localStorage.setItem("graphicsLabBookmarks", JSON.stringify(newBookmarks));
     setIsBookmarked(!isBookmarked);
+    // Trigger storage event for Navbar sync
+    window.dispatchEvent(new Event("storage"));
   };
 
   const downloadPNG = () => {
@@ -107,6 +109,14 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
         link.download = `${illustration.name}_${selectedSize}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
+        
+        // Record download in localStorage
+        const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
+        if (!storedDownloads.some((i: any) => i.id === illustration.id)) {
+          localStorage.setItem("graphicsLabDownloaded", JSON.stringify([illustration, ...storedDownloads]));
+          // Trigger storage event for Navbar sync
+          window.dispatchEvent(new Event("storage"));
+        }
       }
     };
   };
@@ -117,6 +127,14 @@ export default function IllustrationSidePanel({ illustration, onClose }: Illustr
       link.download = `${illustration.name}.svg`;
       link.href = illustration.image;
       link.click();
+
+      // Record download in localStorage
+      const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
+      if (!storedDownloads.some((i: any) => i.id === illustration.id)) {
+        localStorage.setItem("graphicsLabDownloaded", JSON.stringify([illustration, ...storedDownloads]));
+        // Trigger storage event for Navbar sync
+        window.dispatchEvent(new Event("storage"));
+      }
     } else {
       alert("Original file is not an SVG.");
     }

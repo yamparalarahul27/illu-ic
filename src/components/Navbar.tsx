@@ -7,8 +7,12 @@ export default function Navbar() {
   const [displayName, setDisplayName] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sidebarView, setSidebarView] = useState<"menu" | "profile">("menu");
+  const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads">("menu");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Sidebar data
+  const [savedMedia, setSavedMedia] = useState<any[]>([]);
+  const [downloadedItems, setDownloadedItems] = useState<any[]>([]);
   
   // Profile Form States
   const [editName, setEditName] = useState("");
@@ -94,6 +98,28 @@ export default function Navbar() {
       localStorage.setItem("graphicsLabTheme", "light");
     }
   };
+
+  const syncSidebarData = () => {
+    // Sync Saved Media
+    const allIllustrations = JSON.parse(localStorage.getItem("graphicsLabIllustrations") || "[]");
+    const bookmarkedIds = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
+    const saved = allIllustrations.filter((ill: any) => bookmarkedIds.includes(ill.id));
+    setSavedMedia(saved);
+
+    // Sync Downloads
+    const downloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
+    setDownloadedItems(downloads);
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      syncSidebarData();
+      
+      // Listen for local changes (if we're in the same window)
+      window.addEventListener("storage", syncSidebarData);
+      return () => window.removeEventListener("storage", syncSidebarData);
+    }
+  }, []);
 
   useEffect(() => {
     // Check initial dark mode preference
@@ -207,8 +233,8 @@ export default function Navbar() {
             {/* Sidebar Links */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
               <div onClick={() => setSidebarView("profile")} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Profile</div>
-              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Saved Media</div>
-              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Downloads</div>
+              <div onClick={() => { syncSidebarData(); setSidebarView("saved"); }} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Saved Media</div>
+              <div onClick={() => { syncSidebarData(); setSidebarView("downloads"); }} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Downloads</div>
               
               <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
                 {/* Dark Mode Toggle Sidebar Item */}
@@ -250,7 +276,7 @@ export default function Navbar() {
               </div>
             </div>
           </>
-        ) : (
+        ) : sidebarView === "profile" ? (
           <>
             {/* Sidebar Header - Profile View */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
@@ -396,6 +422,39 @@ export default function Navbar() {
                 </button>
               </div>
 
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Sidebar Header - Saved/Downloads View */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+              <button 
+                onClick={() => setSidebarView("menu")}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-primary)", display: "flex", alignItems: "center", padding: "4px" }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+              </button>
+              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", flex: 1, textAlign: "center", paddingRight: "24px" }}>
+                {sidebarView === "saved" ? "Saved Media" : "Downloads"}
+              </h3>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                {(sidebarView === "saved" ? savedMedia : downloadedItems).map((item, idx) => (
+                  <div key={idx} style={{ aspectRatio: "1/1", backgroundColor: "var(--input-bg)", borderRadius: "8px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    <img src={item.image} alt={item.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                  </div>
+                ))}
+              </div>
+              {(sidebarView === "saved" ? savedMedia : downloadedItems).length === 0 && (
+                <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-secondary)" }}>
+                  No items found.
+                </div>
+              )}
             </div>
           </>
         )}
