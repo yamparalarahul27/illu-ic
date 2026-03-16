@@ -168,9 +168,10 @@ function DashboardContent() {
             fill 
             style={{ 
               objectFit: "contain", 
-              objectPosition: "center 10%", // Keep it anchored higher up relative to center
+              objectPosition: "center", // Center it to prevent edge cutoffs
               zIndex: 0,
-              transform: "scale(1.15)" // Give it size but push it upwards
+              paddingBottom: "40px", // Give it a little push up to avoid text overlapping
+              transform: "scale(1.0)" // Reduce scale back down so it fits perfectly
             }} 
           />
 
