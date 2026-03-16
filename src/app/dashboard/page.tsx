@@ -51,14 +51,6 @@ function DashboardContent() {
           style={{ objectFit: "cover", objectPosition: "center", zIndex: 0 }} 
           priority 
         />
-        
-        {/* Gradient Overlay for Text Readability */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%)",
-          zIndex: 1
-        }} />
 
         {/* Text Content */}
         <div style={{ flex: 1, zIndex: 10, padding: "48px 64px", color: "#ffffff" }}>
