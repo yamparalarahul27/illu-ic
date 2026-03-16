@@ -152,7 +152,7 @@ function DashboardContent() {
               width: "40px",
               height: "40px",
               borderRadius: "50%",
-              backgroundColor: "#000000",
+              backgroundColor: "#7c3aed",
               color: "#ffffff",
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               flexShrink: 0
@@ -225,7 +225,7 @@ function DashboardContent() {
               width: "40px",
               height: "40px",
               borderRadius: "50%",
-              backgroundColor: "#000000",
+              backgroundColor: "#7c3aed",
               color: "#ffffff",
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               flexShrink: 0
