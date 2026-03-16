@@ -84,7 +84,7 @@ function DashboardContent() {
         gap: "24px"
       }}>
         
-        {/* Left Card: White - Graphics */}
+        {/* Left Card: Graphics */}
         <div style={{
           position: "relative",
           overflow: "hidden",
@@ -94,9 +94,9 @@ function DashboardContent() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end", // Text back to bottom
-          background: "#ffffff", // Changed to white
+          background: "var(--card-bg)", 
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
-          transition: "transform 0.3s ease, box-shadow 0.3s ease",
+          transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
           cursor: "pointer",
         }}
         className="dashboard-card"
@@ -120,7 +120,7 @@ function DashboardContent() {
             position: "absolute",
             bottom: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to top, rgba(255,255,255,0.9), transparent)", // White overlay from bottom
+            background: "linear-gradient(to top, var(--card-bg), transparent)", 
             zIndex: 1
           }} />
           
@@ -129,9 +129,9 @@ function DashboardContent() {
             margin: 0,
             fontSize: "28px", // Reduced from 36px
             fontWeight: 700,
-            color: "#000000",
+            color: "var(--text-primary)",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px rgba(255,255,255,0.8)",
+            textShadow: "0 2px 10px var(--card-bg)",
             zIndex: 2,
             display: "flex",
             alignItems: "center",
@@ -158,7 +158,7 @@ function DashboardContent() {
           </h2>
         </div>
 
-        {/* Right Card: White - Icons */}
+        {/* Right Card: Icons */}
         <div style={{
           position: "relative",
           overflow: "hidden",
@@ -168,9 +168,9 @@ function DashboardContent() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end", // Text back to bottom
-          background: "#ffffff", // Changed to white
+          background: "var(--card-bg)", 
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
-          transition: "transform 0.3s ease, box-shadow 0.3s ease",
+          transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
           cursor: "pointer",
         }}
         className="dashboard-card"
@@ -193,7 +193,7 @@ function DashboardContent() {
             position: "absolute",
             bottom: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to top, rgba(255,255,255,0.9), transparent)",
+            background: "linear-gradient(to top, var(--card-bg), transparent)",
             zIndex: 1
           }} />
           
@@ -202,9 +202,9 @@ function DashboardContent() {
             margin: 0,
             fontSize: "28px", // Reduced from 36px
             fontWeight: 700,
-            color: "#000000",
+            color: "var(--text-primary)",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px rgba(255,255,255,0.8)",
+            textShadow: "0 2px 10px var(--card-bg)",
             zIndex: 2,
             display: "flex",
             alignItems: "center",

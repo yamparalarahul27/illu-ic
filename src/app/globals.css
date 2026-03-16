@@ -3,6 +3,23 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #6b7280;
+  --input-bg: #f9fafb;
+  --input-hover: #f3f4f6;
+  --border-color: #000000;
+}
+
+.dark {
+  --background: #111827;
+  --foreground: #f3f4f6;
+  --card-bg: #1f2937;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --input-bg: #374151;
+  --input-hover: #4b5563;
+  --border-color: #374151;
 }
 
 @theme inline {

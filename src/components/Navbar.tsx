@@ -8,6 +8,7 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<"menu" | "profile">("menu");
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
   // Profile Form States
   const [editName, setEditName] = useState("");
@@ -68,6 +69,28 @@ export default function Navbar() {
     setTimeout(() => setSidebarView("menu"), 300);
   };
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("graphicsLabTheme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("graphicsLabTheme", "light");
+    }
+  };
+
+  useEffect(() => {
+    // Check initial dark mode preference
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem("graphicsLabTheme");
+      if (storedTheme === "dark") {
+        setIsDarkMode(true);
+        document.documentElement.classList.add("dark");
+      }
+    }
+  }, []);
+
   const EditIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: "pointer", color: "#6b7280" }}>
       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -78,7 +101,41 @@ export default function Navbar() {
   return (
     <>
       <header style={{ justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000 }}>
-        <span className="logo">GRAPHICS LAB</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <span className="logo">GRAPHICS LAB</span>
+          
+          {/* Dark Mode Toggle */}
+          {mounted && (
+            <div 
+              onClick={toggleDarkMode}
+              style={{
+                width: "48px",
+                height: "24px",
+                backgroundColor: isDarkMode ? "#7c3aed" : "#e5e7eb",
+                borderRadius: "24px",
+                position: "relative",
+                cursor: "pointer",
+                transition: "background-color 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                padding: "2px"
+              }}
+            >
+              <div style={{
+                width: "20px",
+                height: "20px",
+                backgroundColor: "#ffffff",
+                borderRadius: "50%",
+                position: "absolute",
+                top: "2px",
+                left: isDarkMode ? "26px" : "2px",
+                transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+              }} />
+            </div>
+          )}
+        </div>
+        
         {mounted && displayName && (
           <div 
             onClick={() => setIsSidebarOpen(true)}
@@ -126,7 +183,7 @@ export default function Navbar() {
         right: 0,
         bottom: 0,
         width: "320px",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--card-bg)",
         boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
         zIndex: 10000,
         transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
@@ -139,7 +196,7 @@ export default function Navbar() {
           <>
             {/* Sidebar Header - Menu View */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
-              <h3 style={{ margin: 0, fontSize: "24px", fontWeight: 700, color: "#000000" }}>Account</h3>
+              <h3 style={{ margin: 0, fontSize: "24px", fontWeight: 700, color: "var(--text-primary)" }}>Account</h3>
               <button 
                 onClick={handleCloseSidebar}
                 style={{ 
@@ -162,10 +219,9 @@ export default function Navbar() {
 
             {/* Sidebar Links */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-              <div onClick={() => setSidebarView("profile")} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb", cursor: "pointer", fontWeight: 500, color: "#000000", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9fafb"}>Profile</div>
-              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb", cursor: "pointer", fontWeight: 500, color: "#000000", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9fafb"}>Settings</div>
-              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb", cursor: "pointer", fontWeight: 500, color: "#000000", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9fafb"}>Saved Media</div>
-              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb", cursor: "pointer", fontWeight: 500, color: "#000000", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9fafb"}>Downloads</div>
+              <div onClick={() => setSidebarView("profile")} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Profile</div>
+              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Saved Media</div>
+              <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Downloads</div>
               
               <div style={{ marginTop: "auto", padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
             </div>
@@ -181,7 +237,7 @@ export default function Navbar() {
                   border: "none", 
                   fontSize: "16px", 
                   cursor: "pointer", 
-                  color: "#000000",
+                  color: "var(--text-primary)",
                   fontWeight: 600,
                   display: "flex",
                   alignItems: "center",
@@ -190,7 +246,7 @@ export default function Navbar() {
               >
                 &lt; Back
               </button>
-              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#000000", flex: 1, textAlign: "center", paddingRight: "44px" }}>Profile</h3>
+              <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", flex: 1, textAlign: "center", paddingRight: "44px" }}>Profile</h3>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: 1, overflowY: "auto" }}>
@@ -220,18 +276,18 @@ export default function Navbar() {
                 
                 {/* Name Field */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px" }}>Name</label>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "8px", border: isEditingName ? "1px solid #7c3aed" : "1px solid transparent" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Name</label>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", backgroundColor: "var(--input-bg)", borderRadius: "8px", border: isEditingName ? "1px solid #7c3aed" : "1px solid transparent" }}>
                     {isEditingName ? (
                       <input 
                         type="text" 
                         value={editName} 
                         onChange={(e) => setEditName(e.target.value)}
-                        style={{ background: "transparent", border: "none", outline: "none", flex: 1, color: "#000000", fontSize: "14px", fontWeight: 500 }}
+                        style={{ background: "transparent", border: "none", outline: "none", flex: 1, color: "var(--text-primary)", fontSize: "14px", fontWeight: 500 }}
                         autoFocus
                       />
                     ) : (
-                      <span style={{ color: "#000000", fontSize: "14px", fontWeight: 500 }}>{editName || displayName}</span>
+                      <span style={{ color: "var(--text-primary)", fontSize: "14px", fontWeight: 500 }}>{editName || displayName}</span>
                     )}
                     <div onClick={() => setIsEditingName(!isEditingName)}>
                       <EditIcon />
@@ -241,19 +297,19 @@ export default function Navbar() {
 
                 {/* Email Field */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px" }}>Email ID</label>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "8px", border: isEditingEmail ? "1px solid #7c3aed" : "1px solid transparent" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Email ID</label>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", backgroundColor: "var(--input-bg)", borderRadius: "8px", border: isEditingEmail ? "1px solid #7c3aed" : "1px solid transparent" }}>
                     {isEditingEmail ? (
                       <input 
                         type="email" 
                         value={editEmail} 
                         onChange={(e) => setEditEmail(e.target.value)}
                         placeholder="Enter email"
-                        style={{ background: "transparent", border: "none", outline: "none", flex: 1, color: "#000000", fontSize: "14px", fontWeight: 500 }}
+                        style={{ background: "transparent", border: "none", outline: "none", flex: 1, color: "var(--text-primary)", fontSize: "14px", fontWeight: 500 }}
                         autoFocus
                       />
                     ) : (
-                      <span style={{ color: editEmail ? "#000000" : "#9ca3af", fontSize: "14px", fontWeight: 500 }}>{editEmail || "Not provided"}</span>
+                      <span style={{ color: editEmail ? "var(--text-primary)" : "var(--text-secondary)", fontSize: "14px", fontWeight: 500 }}>{editEmail || "Not provided"}</span>
                     )}
                     <div onClick={() => setIsEditingEmail(!isEditingEmail)}>
                       <EditIcon />
@@ -263,19 +319,19 @@ export default function Navbar() {
 
                 {/* Team Name Field */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px" }}>Add team name</label>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", backgroundColor: "#f9fafb", borderRadius: "8px", border: isEditingTeam ? "1px solid #7c3aed" : "1px solid transparent" }}>
+                  <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Add team name</label>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px", backgroundColor: "var(--input-bg)", borderRadius: "8px", border: isEditingTeam ? "1px solid #7c3aed" : "1px solid transparent" }}>
                     {isEditingTeam ? (
                       <input 
                         type="text" 
                         value={editTeam} 
                         onChange={(e) => setEditTeam(e.target.value)}
                         placeholder="Enter team name"
-                        style={{ background: "transparent", border: "none", outline: "none", flex: 1, color: "#000000", fontSize: "14px", fontWeight: 500 }}
+                        style={{ background: "transparent", border: "none", outline: "none", flex: 1, color: "var(--text-primary)", fontSize: "14px", fontWeight: 500 }}
                         autoFocus
                       />
                     ) : (
-                      <span style={{ color: editTeam ? "#000000" : "#9ca3af", fontSize: "14px", fontWeight: 500 }}>{editTeam || "No team assigned"}</span>
+                      <span style={{ color: editTeam ? "var(--text-primary)" : "var(--text-secondary)", fontSize: "14px", fontWeight: 500 }}>{editTeam || "No team assigned"}</span>
                     )}
                     <div onClick={() => setIsEditingTeam(!isEditingTeam)}>
                       <EditIcon />
