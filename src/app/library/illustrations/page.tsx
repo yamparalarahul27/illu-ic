@@ -77,6 +77,12 @@ export default function IllustrationsLibrary() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate that the file is an SVG
+      if (file.type !== "image/svg+xml" && !file.name.toLowerCase().endsWith(".svg")) {
+        alert("Please upload SVG files only.");
+        return;
+      }
+
       const fileName = `${Date.now()}_${file.name}`;
       
       // 1. Upload to Supabase Storage
@@ -158,7 +164,7 @@ export default function IllustrationsLibrary() {
       />
       <input 
         type="file" 
-        accept="image/*" 
+        accept=".svg,image/svg+xml" 
         ref={fileInputRef} 
         onChange={handleFileUpload} 
         style={{ display: "none" }} 
