@@ -152,7 +152,7 @@ function DashboardContent() {
               objectFit: "contain", 
               objectPosition: "center", 
               zIndex: 0,
-              transform: "scale(1.2)" // Increases size inside the card
+              transform: "scale(0.9)" // Reduces size inside the card to accommodate the new asset
             }} 
           />
 
