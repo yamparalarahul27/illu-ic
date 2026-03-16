@@ -10,6 +10,7 @@ function DashboardContent() {
 
   const [displayName, setDisplayName] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -30,6 +31,35 @@ function DashboardContent() {
 
   return (
     <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px", fontFamily: "Helvetica, Arial, sans-serif" }}>
+      
+      {/* Profile Icon Header Button */}
+      <div 
+        onClick={() => setIsSidebarOpen(true)}
+        style={{
+          position: "fixed",
+          top: "24px",
+          right: "24px",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          backgroundColor: "#7c3aed",
+          color: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "20px",
+          fontWeight: 700,
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          zIndex: 100,
+          transition: "transform 0.2s ease",
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+        onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+      >
+        {mounted && displayName ? displayName.charAt(0).toUpperCase() : ""}
+      </div>
+
       {/* Top Banner */}
       <div style={{
         position: "relative",
@@ -231,6 +261,68 @@ function DashboardContent() {
           </h2>
         </div>
 
+      </div>
+
+      {/* Sidebar Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            zIndex: 999,
+            transition: "opacity 0.3s ease"
+          }}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: "320px",
+        backgroundColor: "#ffffff",
+        boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
+        zIndex: 1000,
+        transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
+        transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        display: "flex",
+        flexDirection: "column",
+        padding: "32px 24px"
+      }}>
+        {/* Sidebar Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
+          <h3 style={{ margin: 0, fontSize: "24px", fontWeight: 700, color: "#000000" }}>Account</h3>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            style={{ 
+              background: "none", 
+              border: "none", 
+              fontSize: "28px", 
+              cursor: "pointer", 
+              color: "#666",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "32px",
+              height: "32px",
+              padding: 0
+            }}
+          >
+            &times;
+          </button>
+        </div>
+
+        {/* Sidebar Links */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+          <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb", cursor: "pointer", fontWeight: 500, color: "#000000", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9fafb"}>Profile</div>
+          <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#f9fafb", cursor: "pointer", fontWeight: 500, color: "#000000", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f9fafb"}>Settings</div>
+          
+          <div style={{ marginTop: "auto", padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
+        </div>
       </div>
 
       {/* Embedded CSS for hover effects */}
