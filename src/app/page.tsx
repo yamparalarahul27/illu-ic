@@ -10,6 +10,7 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (!name.trim()) return;
+    localStorage.setItem("graphicsLabUserName", name.trim());
     // Route to Dashboard. Pass name via URL parameter.
     router.push(`/dashboard?name=${encodeURIComponent(name.trim())}`);
   };

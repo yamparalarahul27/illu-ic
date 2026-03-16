@@ -1,14 +1,32 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
   const nameParam = searchParams.get("name");
-  const displayName = nameParam ? nameParam.trim() : "";
-  const greeting = displayName ? `Hi ${displayName}! Welcome to Graphics Lab.` : `Hi! Welcome to Graphics Lab.`;
+
+  const [displayName, setDisplayName] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (nameParam) {
+      const name = nameParam.trim();
+      setDisplayName(name);
+      localStorage.setItem("graphicsLabUserName", name);
+    } else {
+      // Look for the name in local storage if it's lost from the URL
+      const storedName = localStorage.getItem("graphicsLabUserName");
+      if (storedName) {
+        setDisplayName(storedName);
+      }
+    }
+  }, [nameParam]);
+
+  const greeting = mounted && displayName ? `Hi ${displayName}! Welcome to Graphics Lab.` : `Hi! Welcome to Graphics Lab.`;
 
   return (
     <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px", fontFamily: "Helvetica, Arial, sans-serif" }}>
