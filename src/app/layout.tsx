@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Agentation } from "agentation";
 import SplashScreen from "@/components/SplashScreen";
 import Navbar from "@/components/Navbar";
+import { GlobalSoundProvider } from "@/components/GlobalSoundProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SplashScreen />
-        <Navbar />
-        {children}
-        {process.env.NODE_ENV === "development" && <Agentation />}
+        <GlobalSoundProvider>
+          <SplashScreen />
+          <Navbar />
+          {children}
+          {process.env.NODE_ENV === "development" && <Agentation />}
+        </GlobalSoundProvider>
       </body>
     </html>
   );
