@@ -99,7 +99,7 @@ function DashboardContent() {
               objectFit: "contain", 
               objectPosition: "center", 
               zIndex: 0,
-              padding: "20px" // Add a little padding so it doesn't touch the edges
+              transform: "scale(1.2)" // Increases size inside the card
             }} 
           />
 
@@ -152,7 +152,7 @@ function DashboardContent() {
               objectFit: "contain", 
               objectPosition: "center", 
               zIndex: 0,
-              padding: "20px" 
+              transform: "scale(1.2)" // Increases size inside the card
             }} 
           />
 
