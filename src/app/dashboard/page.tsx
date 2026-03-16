@@ -73,7 +73,7 @@ function DashboardContent() {
         gap: "24px"
       }}>
         
-        {/* Left Card: Pink - Graphics */}
+        {/* Left Card: White - Graphics */}
         <div style={{
           position: "relative",
           overflow: "hidden",
@@ -83,8 +83,8 @@ function DashboardContent() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
-          background: "linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)", // Vibrant fallback
-          boxShadow: "0 20px 40px -10px rgba(251, 194, 235, 0.4)",
+          background: "#ffffff", // Changed to white
+          boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
           cursor: "pointer",
         }}
@@ -95,7 +95,11 @@ function DashboardContent() {
             src="/ill_graphic_card_design.png" 
             alt="Graphics Card Design" 
             fill 
-            style={{ objectFit: "cover", zIndex: 0 }} 
+            style={{ 
+              objectFit: "cover", 
+              objectPosition: "center -5px", 
+              zIndex: 0 
+            }} 
           />
 
           {/* Glass Overlay for Text Readability */}
