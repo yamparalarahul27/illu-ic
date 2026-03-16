@@ -11,7 +11,7 @@ function DashboardContent() {
   const greeting = displayName ? `Hi ${displayName}! Welcome to Graphics Lab.` : `Hi! Welcome to Graphics Lab.`;
 
   return (
-    <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}>
+    <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px", fontFamily: "Helvetica, Arial, sans-serif" }}>
       {/* Top Banner */}
       <div style={{
         position: "relative",
@@ -82,7 +82,7 @@ function DashboardContent() {
           minHeight: "300px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
+          justifyContent: "flex-start",
           background: "#ffffff", // Changed to white
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -106,9 +106,9 @@ function DashboardContent() {
           {/* Glass Overlay for Text Readability */}
           <div style={{
             position: "absolute",
-            bottom: 0, left: 0, right: 0,
+            top: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+            background: "linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)",
             zIndex: 1
           }} />
           
@@ -135,7 +135,7 @@ function DashboardContent() {
           minHeight: "300px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
+          justifyContent: "flex-start",
           background: "#ffffff", // Changed to white
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -158,9 +158,9 @@ function DashboardContent() {
 
           <div style={{
             position: "absolute",
-            bottom: 0, left: 0, right: 0,
+            top: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+            background: "linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)",
             zIndex: 1
           }} />
           
