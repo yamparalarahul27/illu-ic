@@ -227,6 +227,128 @@ function DashboardContent() {
           </h2>
         </div>
 
+        {/* Third Card: Branding */}
+        <div style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "20px",
+          padding: "40px",
+          minHeight: "300px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end", // Text back to bottom
+          background: "var(--card-bg)", 
+          boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
+          transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
+          cursor: "pointer",
+        }}
+        className="dashboard-card"
+        >
+          {/* Background Placeholder - since no asset specified */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle at center, #7c3aed 10%, transparent 80%)", zIndex: 0 }} />
+
+          <div style={{
+            position: "absolute",
+            bottom: 0, left: 0, right: 0,
+            padding: "30px 40px",
+            background: "linear-gradient(to top, var(--card-bg), transparent)",
+            zIndex: 1
+          }} />
+          
+          <h2 style={{
+            position: "relative",
+            margin: 0,
+            fontSize: "28px", 
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            letterSpacing: "-1px",
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}>
+            <span>Branding</span>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor: "#7c3aed",
+              color: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              flexShrink: 0
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </h2>
+        </div>
+
+        {/* Fourth Card: Brand Guidelines */}
+        <div style={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "20px",
+          padding: "40px",
+          minHeight: "300px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end", // Text back to bottom
+          background: "var(--card-bg)", 
+          boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
+          transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
+          cursor: "pointer",
+        }}
+        className="dashboard-card"
+        >
+          {/* Background Placeholder - since no asset specified */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle at center, #ec4899 10%, transparent 80%)", zIndex: 0 }} />
+
+          <div style={{
+            position: "absolute",
+            bottom: 0, left: 0, right: 0,
+            padding: "30px 40px",
+            background: "linear-gradient(to top, var(--card-bg), transparent)",
+            zIndex: 1
+          }} />
+          
+          <h2 style={{
+            position: "relative",
+            margin: 0,
+            fontSize: "28px", 
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            letterSpacing: "-1px",
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}>
+            <span>Brand Guidelines</span>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor: "#7c3aed",
+              color: "#ffffff",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              flexShrink: 0
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </h2>
+        </div>
+
       </div>
 
       {/* Embedded CSS for hover effects */}
@@ -239,6 +361,12 @@ function DashboardContent() {
         }
         .dashboard-card:nth-child(2):hover {
           box-shadow: 0 30px 60px -15px rgba(224, 195, 252, 0.6) !important;
+        }
+        .dashboard-card:nth-child(3):hover {
+          box-shadow: 0 30px 60px -15px rgba(167, 139, 250, 0.6) !important;
+        }
+        .dashboard-card:nth-child(4):hover {
+          box-shadow: 0 30px 60px -15px rgba(244, 114, 182, 0.6) !important;
         }
       `}} />
     </div>
