@@ -189,10 +189,10 @@ function DashboardContent() {
             fill 
             style={{ 
               objectFit: "contain", 
-              objectPosition: "center", // Center it to prevent edge cutoffs
+              objectPosition: "center", // Strictly center it horizontally and vertically
               zIndex: 0,
-              paddingBottom: "40px", // Give it a little push up to avoid text overlapping
-              transform: "scale(1.1)" // Increased by 10%
+              padding: "20px", // Provide uniform padding around the edges
+              transform: "scale(1.15)" // Maintain slight upscale for premium feel
             }} 
           />
 
