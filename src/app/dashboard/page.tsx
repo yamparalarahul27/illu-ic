@@ -134,7 +134,7 @@ function DashboardContent() {
             alignItems: "center",
             justifyContent: "space-between"
           }}>
-            <span>Graphics</span>
+            <span>Illustrations</span>
             <div style={{
               display: "flex",
               alignItems: "center",
