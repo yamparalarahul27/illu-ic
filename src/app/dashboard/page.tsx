@@ -126,7 +126,7 @@ function DashboardContent() {
           </h2>
         </div>
 
-        {/* Right Card: Purple - Icons */}
+        {/* Right Card: White - Icons */}
         <div style={{
           position: "relative",
           overflow: "hidden",
@@ -136,18 +136,32 @@ function DashboardContent() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
-          background: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)", // Vibrant fallback
-          boxShadow: "0 20px 40px -10px rgba(224, 195, 252, 0.4)",
+          background: "#ffffff", // Changed to white
+          boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.1)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
           cursor: "pointer",
         }}
         className="dashboard-card"
         >
+          {/* Background Image */}
+          <Image 
+            src="/ill_icons_card_design.png" 
+            alt="Icons Card Design" 
+            fill 
+            style={{ 
+              objectFit: "contain", 
+              objectPosition: "center", 
+              zIndex: 0,
+              padding: "20px" 
+            }} 
+          />
+
           <div style={{
             position: "absolute",
             bottom: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)"
+            background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+            zIndex: 1
           }} />
           
           <h2 style={{
@@ -157,7 +171,8 @@ function DashboardContent() {
             fontWeight: 700,
             color: "#ffffff",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px rgba(0,0,0,0.2)"
+            textShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            zIndex: 2
           }}>
             Icons
           </h2>
