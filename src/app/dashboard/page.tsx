@@ -53,14 +53,14 @@ function DashboardContent() {
         />
 
         {/* Text Content */}
-        <div style={{ flex: 1, zIndex: 10, padding: "48px 64px", color: "#000000" }}>
+        <div style={{ flex: 1, zIndex: 10, padding: "48px 64px", color: "var(--text-primary)" }}>
           <h1 style={{
             fontSize: "42px",
             fontWeight: 700,
             letterSpacing: "-1px",
             margin: "0 0 16px 0",
             lineHeight: "1.2",
-            textShadow: "0 2px 15px rgba(255,255,255,0.8)"
+            textShadow: "0 2px 15px var(--background)"
           }}>
             {greetingPrefix}
             <span style={{ color: "#7c3aed" }}>Graphics Lab.</span>
@@ -70,7 +70,7 @@ function DashboardContent() {
             opacity: 0.9, 
             maxWidth: "500px", 
             lineHeight: "1.5", 
-            textShadow: "0 2px 10px rgba(255,255,255,0.8)" 
+            textShadow: "0 2px 10px var(--background)" 
           }}>
             Explore all the illustration of Crpko app here
           </p>
