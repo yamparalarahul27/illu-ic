@@ -102,41 +102,9 @@ export default function Navbar() {
     <>
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000, padding: "0 20px" }}>
         
-        {/* Left Section: Logo & Toggle */}
+        {/* Left Section: Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           <span className="logo">GRAPHICS LAB</span>
-          
-          {/* Dark Mode Toggle */}
-          {mounted && (
-            <div 
-              onClick={toggleDarkMode}
-              style={{
-                width: "48px",
-                height: "24px",
-                backgroundColor: isDarkMode ? "#7c3aed" : "#e5e7eb",
-                borderRadius: "24px",
-                position: "relative",
-                cursor: "pointer",
-                transition: "background-color 0.3s ease",
-                display: "flex",
-                alignItems: "center",
-                padding: "2px",
-                flexShrink: 0
-              }}
-            >
-              <div style={{
-                width: "20px",
-                height: "20px",
-                backgroundColor: "#ffffff",
-                borderRadius: "50%",
-                position: "absolute",
-                top: "2px",
-                left: isDarkMode ? "26px" : "2px",
-                transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
-              }} />
-            </div>
-          )}
         </div>
         
         {/* Right Section: Profile Icon */}
@@ -187,7 +155,7 @@ export default function Navbar() {
         right: 0,
         bottom: 0,
         width: "320px",
-        backgroundColor: "var(--card-bg)",
+        backgroundColor: "var(--background)",
         boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
         zIndex: 10000,
         transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
@@ -227,7 +195,44 @@ export default function Navbar() {
               <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Saved Media</div>
               <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Downloads</div>
               
-              <div style={{ marginTop: "auto", padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
+              <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
+                {/* Dark Mode Toggle Sidebar Item */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", color: "var(--text-primary)", fontWeight: 500 }}>
+                  <span>Dark Mode</span>
+                  {mounted && (
+                    <div 
+                      onClick={toggleDarkMode}
+                      style={{
+                        width: "48px",
+                        height: "24px",
+                        backgroundColor: isDarkMode ? "#7c3aed" : "#e5e7eb",
+                        borderRadius: "24px",
+                        position: "relative",
+                        cursor: "pointer",
+                        transition: "background-color 0.3s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "2px",
+                        flexShrink: 0
+                      }}
+                    >
+                      <div style={{
+                        width: "20px",
+                        height: "20px",
+                        backgroundColor: "#ffffff",
+                        borderRadius: "50%",
+                        position: "absolute",
+                        top: "2px",
+                        left: isDarkMode ? "26px" : "2px",
+                        transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                      }} />
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
+              </div>
             </div>
           </>
         ) : (
