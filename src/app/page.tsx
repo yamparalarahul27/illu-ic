@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("graphicsLabUserName");
+    if (storedName) {
+      router.push("/dashboard");
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
 
   const handleGetStarted = () => {
     if (!name.trim()) return;
@@ -14,6 +24,10 @@ export default function Home() {
     // Route to Dashboard. Pass name via URL parameter.
     router.push(`/dashboard?name=${encodeURIComponent(name.trim())}`);
   };
+
+  if (isChecking) {
+    return <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}></main>;
+  }
 
   return (
     <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
