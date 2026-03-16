@@ -42,6 +42,17 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
+    // Populate form state when components load
+    if (typeof window !== "undefined") {
+      const storedEmail = localStorage.getItem("graphicsLabUserEmail");
+      if (storedEmail) setEditEmail(storedEmail);
+
+      const storedTeam = localStorage.getItem("graphicsLabUserTeam");
+      if (storedTeam) setEditTeam(storedTeam);
+    }
+  }, []);
+
+  useEffect(() => {
     // Populate form state when displayName loads
     if (displayName && !editName) {
       setEditName(displayName);
@@ -54,6 +65,10 @@ export default function Navbar() {
       localStorage.setItem("graphicsLabUserName", editName.trim());
       setDisplayName(editName.trim());
     }
+    
+    localStorage.setItem("graphicsLabUserEmail", editEmail.trim());
+    localStorage.setItem("graphicsLabUserTeam", editTeam.trim());
+
     // Turn off edit modes
     setIsEditingName(false);
     setIsEditingEmail(false);
