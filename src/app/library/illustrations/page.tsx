@@ -1,31 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+// Interface for Illustration objects
+interface Illustration {
+  id: number;
+  name: string;
+  image: string;
+}
+
 // Mock data for illustrations to populate the grid
-const ILLUSTRATIONS = [
-  { id: 1, name: "Finance Dashboard", image: "/ill_graphic_card_design.png" },
-  { id: 2, name: "Onboarding Flow", image: "/ill_icons_card_design.png" },
-  { id: 3, name: "Welcome Banner", image: "/ill_welcome_banner.png" },
-  { id: 4, name: "Marketing Graphics", image: "/ill_graphic_card_design.png" },
-  { id: 5, name: "App Interface", image: "/ill_icons_card_design.png" },
-  { id: 6, name: "User Profile", image: "/ill_welcome_banner.png" },
-  { id: 7, name: "Data Charts", image: "/ill_graphic_card_design.png" },
-  { id: 8, name: "Empty States", image: "/ill_icons_card_design.png" },
-];
+const INITIAL_ILLUSTRATIONS: Illustration[] = [];
 
 export default function IllustrationsLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [illustrations, setIllustrations] = useState(INITIAL_ILLUSTRATIONS);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredIllustrations = ILLUSTRATIONS.filter((item) =>
+  const filteredIllustrations = illustrations.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const newIllustration = {
+        id: Date.now(),
+        name: file.name.split('.').slice(0, -1).join('.') || file.name,
+        image: URL.createObjectURL(file)
+      };
+      setIllustrations([newIllustration, ...illustrations]);
+    }
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px" }}>
       
+      {/* Hidden file input */}
+      <input 
+        type="file" 
+        accept="image/*" 
+        ref={fileInputRef} 
+        onChange={handleFileUpload} 
+        style={{ display: "none" }} 
+      />
+
       {/* Search Bar Row (Sticky) */}
       <div style={{
         position: "sticky",
@@ -37,7 +62,7 @@ export default function IllustrationsLibrary() {
         alignItems: "center",
         gap: "16px"
       }}>
-        {/* Back Link */}
+        {/* Back Link (Left) */}
         <Link 
           href="/dashboard"
           style={{
@@ -50,7 +75,8 @@ export default function IllustrationsLibrary() {
             backgroundColor: "var(--input-bg)",
             color: "var(--text-primary)",
             textDecoration: "none",
-            transition: "background-color 0.2s ease"
+            transition: "background-color 0.2s ease",
+            flexShrink: 0
           }}
           className="back-btn"
         >
@@ -59,8 +85,8 @@ export default function IllustrationsLibrary() {
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </Link>
-
-        {/* Search Input Container */}
+        
+        {/* Search Input Container (Center) */}
         <div style={{
           position: "relative",
           flex: 1,
@@ -99,6 +125,37 @@ export default function IllustrationsLibrary() {
             className="search-input"
           />
         </div>
+
+        {/* Upload Button (Right) */}
+        <button
+          onClick={triggerFileUpload}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            height: "48px",
+            padding: "0 28px",
+            borderRadius: "24px",
+            backgroundColor: "#7c3aed",
+            color: "#ffffff",
+            fontWeight: 600,
+            fontSize: "16px",
+            border: "none",
+            cursor: "pointer",
+            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
+            flexShrink: 0
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 6px 16px rgba(124, 58, 237, 0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "none";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.2)";
+          }}
+        >
+          Upload
+        </button>
       </div>
 
       {/* Title */}
