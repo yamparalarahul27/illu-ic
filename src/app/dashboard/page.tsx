@@ -59,8 +59,7 @@ function DashboardContent() {
             fontWeight: 700,
             letterSpacing: "-1px",
             margin: "0 0 16px 0",
-            lineHeight: "1.2",
-            textShadow: "0 2px 15px var(--background)"
+            lineHeight: "1.2"
           }}>
             {greetingPrefix}
             <span style={{ color: "#7c3aed" }}>Graphics Lab.</span>
@@ -69,8 +68,7 @@ function DashboardContent() {
             fontSize: "16px", 
             opacity: 0.9, 
             maxWidth: "500px", 
-            lineHeight: "1.5", 
-            textShadow: "0 2px 10px var(--background)" 
+            lineHeight: "1.5"
           }}>
             Explore all the illustration of Crpko app here
           </p>
@@ -131,7 +129,6 @@ function DashboardContent() {
             fontWeight: 700,
             color: "var(--text-primary)",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px var(--card-bg)",
             zIndex: 2,
             display: "flex",
             alignItems: "center",
@@ -204,7 +201,6 @@ function DashboardContent() {
             fontWeight: 700,
             color: "var(--text-primary)",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px var(--card-bg)",
             zIndex: 2,
             display: "flex",
             alignItems: "center",
