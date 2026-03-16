@@ -90,12 +90,21 @@ function DashboardContent() {
         }}
         className="dashboard-card"
         >
+          {/* Background Image */}
+          <Image 
+            src="/ill_graphic_card_design.png" 
+            alt="Graphics Card Design" 
+            fill 
+            style={{ objectFit: "cover", zIndex: 0 }} 
+          />
+
           {/* Glass Overlay for Text Readability */}
           <div style={{
             position: "absolute",
             bottom: 0, left: 0, right: 0,
             padding: "30px 40px",
-            background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)"
+            background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)",
+            zIndex: 1
           }} />
           
           <h2 style={{
@@ -105,7 +114,8 @@ function DashboardContent() {
             fontWeight: 700,
             color: "#ffffff",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px rgba(0,0,0,0.2)"
+            textShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            zIndex: 2
           }}>
             Graphics
           </h2>
