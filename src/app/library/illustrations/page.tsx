@@ -43,6 +43,17 @@ export default function IllustrationsLibrary() {
     }
   }, [illustrations, isMounted]);
 
+  // Sync dark mode class with filterMode
+  useEffect(() => {
+    if (isMounted) {
+      if (filterMode === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, [filterMode, isMounted]);
+
   const filteredIllustrations = illustrations.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (filterMode === "all") return matchesSearch;
