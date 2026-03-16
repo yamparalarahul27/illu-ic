@@ -122,6 +122,15 @@ export default function IllustrationsLibrary() {
     }
   };
 
+  const handleCardClick = (id: number) => {
+    setIsLoading(true);
+    // Brief delay to allow the loading animation to be seen
+    setTimeout(() => {
+      setSelectedId(id);
+      setIsLoading(false);
+    }, 400);
+  };
+
   const triggerFileUpload = () => {
     fileInputRef.current?.click();
   };
@@ -365,7 +374,7 @@ export default function IllustrationsLibrary() {
           filteredIllustrations.map((illustration) => (
             <div 
               key={illustration.id}
-              onClick={() => setSelectedId(illustration.id)}
+              onClick={() => handleCardClick(illustration.id)}
               style={{
                 position: "relative",
                 aspectRatio: "1 / 1",

@@ -1,16 +1,19 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const nameParam = searchParams.get("name");
 
   const [displayName, setDisplayName] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -26,6 +29,13 @@ function DashboardContent() {
       }
     }
   }, [nameParam]);
+
+  const handleNavigation = (href: string) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      router.push(href);
+    }, 500);
+  };
 
   const greetingPrefix = mounted && displayName ? `Hi ${displayName}! Welcome to ` : `Hi! Welcome to `;
 
@@ -82,9 +92,13 @@ function DashboardContent() {
         gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
         gap: "24px"
       }}>
+        {isLoading && <LoadingOverlay message="Opening Library..." />}
         
         {/* Left Card: Graphics */}
-        <Link href="/library/illustrations" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column' }}>
+        <div 
+          onClick={() => handleNavigation("/library/illustrations")} 
+          style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column' }}
+        >
           <div style={{
             position: "relative",
             overflow: "hidden",
@@ -157,7 +171,7 @@ function DashboardContent() {
               </div>
             </h2>
           </div>
-        </Link>
+        </div>
 
         {/* Right Card: Icons */}
         <div style={{

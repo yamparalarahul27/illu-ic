@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 export default function Navbar() {
+  const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads">("menu");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Sidebar data
   const [savedMedia, setSavedMedia] = useState<any[]>([]);
@@ -99,6 +102,15 @@ export default function Navbar() {
     }
   };
 
+
+  const handleNavigation = (href: string) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      router.push(href);
+      setIsLoading(false);
+    }, 500);
+  };
+
   const syncSidebarData = () => {
     // Sync Saved Media
     const allIllustrations = JSON.parse(localStorage.getItem("graphicsLabIllustrations") || "[]");
@@ -141,11 +153,18 @@ export default function Navbar() {
 
   return (
     <>
+      {isLoading && <LoadingOverlay message="Navigating..." />}
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000, padding: "0 20px" }}>
         
         {/* Left Section: Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <span className="logo">GRAPHICS LAB</span>
+          <span 
+            className="logo" 
+            onClick={() => handleNavigation("/dashboard")}
+            style={{ cursor: "pointer" }}
+          >
+            GRAPHICS LAB
+          </span>
         </div>
         
         {/* Right Section: Profile Icon */}
