@@ -115,7 +115,7 @@ function DashboardContent() {
           <h2 style={{
             position: "relative",
             margin: 0,
-            fontSize: "36px",
+            fontSize: "28px", // Reduced from 36px
             fontWeight: 700,
             color: "#000000",
             letterSpacing: "-1px",
@@ -167,7 +167,7 @@ function DashboardContent() {
           <h2 style={{
             position: "relative",
             margin: 0,
-            fontSize: "36px",
+            fontSize: "28px", // Reduced from 36px
             fontWeight: 700,
             color: "#000000",
             letterSpacing: "-1px",
