@@ -45,10 +45,10 @@ function DashboardContent() {
       }}>
         {/* Background Image spanning the entire layout */}
         <Image 
-          src="/2.jpeg" 
+          src="/ill_welcome_banner.png" 
           alt="Welcome Graphics Lab Illustration" 
           fill 
-          style={{ objectFit: "cover", objectPosition: "bottom", zIndex: 0 }} 
+          style={{ objectFit: "cover", objectPosition: "center", zIndex: 0 }} 
           priority 
         />
         
