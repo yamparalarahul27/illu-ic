@@ -117,9 +117,9 @@ function DashboardContent() {
             margin: 0,
             fontSize: "36px",
             fontWeight: 700,
-            color: "#ffffff",
+            color: "#000000",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            textShadow: "0 2px 10px rgba(255,255,255,0.8)",
             zIndex: 2
           }}>
             Graphics
@@ -169,9 +169,9 @@ function DashboardContent() {
             margin: 0,
             fontSize: "36px",
             fontWeight: 700,
-            color: "#ffffff",
+            color: "#000000",
             letterSpacing: "-1px",
-            textShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            textShadow: "0 2px 10px rgba(255,255,255,0.8)",
             zIndex: 2
           }}>
             Icons
