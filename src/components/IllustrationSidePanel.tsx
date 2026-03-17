@@ -8,7 +8,8 @@ interface Illustration {
   id: number;
   name: string;
   image: string;
-  image_url?: string;
+  image_url: string;
+  dark_image_url?: string;
 }
 
 interface Comment {
@@ -36,6 +37,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
   const [comments, setComments] = useState<Comment[]>([]);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isDarkPreview, setIsDarkPreview] = useState(false);
 
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
 
@@ -111,7 +113,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     const canvas = document.createElement("canvas");
     const img = new window.Image();
     img.crossOrigin = "anonymous";
-    img.src = illustration.image_url || illustration.image;
+    img.src = (isDarkPreview && illustration.dark_image_url) ? illustration.dark_image_url : (illustration.image_url || illustration.image);
     img.onload = () => {
       const scale = parseInt(selectedSize);
       canvas.width = img.width * scale;
@@ -140,8 +142,8 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     
     if (isSvg) {
       const link = document.createElement("a");
-      link.download = `${illustration.name}.svg`;
-      link.href = illustration.image_url || illustration.image;
+      link.download = `${illustration.name}${isDarkPreview ? '_dark' : ''}.svg`;
+      link.href = (isDarkPreview && illustration.dark_image_url) ? illustration.dark_image_url : (illustration.image_url || illustration.image);
       link.click();
 
       // Record download in localStorage (Local history)
@@ -279,7 +281,16 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
       }}>
         {/* Header */}
         <div style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={onClose} style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "var(--text-primary)", padding: 0 }}>
+          <button 
+            onClick={() => {
+              if (isDarkPreview) {
+                setIsDarkPreview(false);
+              } else {
+                onClose();
+              }
+            }} 
+            style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "var(--text-primary)", padding: 0 }}
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
@@ -293,8 +304,58 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
         {/* Content */}
         <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
           {/* Preview */}
-          <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", backgroundColor: "var(--card-bg)", borderRadius: "16px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border-color)" }}>
-            <img src={illustration.image_url || illustration.image} alt={illustration.name} style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain" }} />
+          <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", backgroundColor: isDarkPreview ? "#1e1b4b" : "var(--card-bg)", borderRadius: "16px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border-color)", transition: "background-color 0.3s ease" }}>
+            {illustration.dark_image_url && (
+              <div style={{
+                position: "absolute",
+                top: "12px",
+                right: "12px",
+                display: "flex",
+                backgroundColor: "var(--background)",
+                padding: "4px",
+                borderRadius: "20px",
+                border: "1px solid var(--border-color)",
+                zIndex: 10
+              }}>
+                <button 
+                  onClick={() => setIsDarkPreview(false)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "16px",
+                    border: "none",
+                    backgroundColor: !isDarkPreview ? "#7c3aed" : "transparent",
+                    color: !isDarkPreview ? "#ffffff" : "var(--text-secondary)",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  Light
+                </button>
+                <button 
+                  onClick={() => setIsDarkPreview(true)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "16px",
+                    border: "none",
+                    backgroundColor: isDarkPreview ? "#7c3aed" : "transparent",
+                    color: isDarkPreview ? "#ffffff" : "var(--text-secondary)",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  Dark
+                </button>
+              </div>
+            )}
+            <img 
+              src={(isDarkPreview && illustration.dark_image_url) ? illustration.dark_image_url : (illustration.image_url || illustration.image)} 
+              alt={illustration.name} 
+              style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain", transition: "all 0.3s ease" }} 
+            />
           </div>
 
           {/* Name & Copy */}

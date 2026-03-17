@@ -464,8 +464,23 @@ export default function Navbar() {
             <div style={{ flex: 1, overflowY: "auto" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 {(sidebarView === "saved" ? savedMedia : downloadedItems).map((item, idx) => (
-                  <div key={idx} style={{ aspectRatio: "1/1", backgroundColor: "var(--input-bg)", borderRadius: "8px", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    <img src={item.image} alt={item.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                  <div key={idx} style={{ 
+                    aspectRatio: "1/1", 
+                    backgroundColor: isDarkMode ? "#1e1b4b" : "var(--input-bg)", 
+                    borderRadius: "8px", 
+                    padding: "12px", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    overflow: "hidden",
+                    border: "1px solid var(--border-color)",
+                    transition: "all 0.3s ease"
+                  }}>
+                    <img 
+                      src={isDarkMode && item.dark_image_url ? item.dark_image_url : (item.image_url || item.image)} 
+                      alt={item.name} 
+                      style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} 
+                    />
                   </div>
                 ))}
               </div>

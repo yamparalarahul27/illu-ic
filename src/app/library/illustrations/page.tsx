@@ -12,7 +12,8 @@ interface Illustration {
   id: number;
   name: string;
   image: string;
-  image_url?: string;
+  image_url: string; // Light version (Primary)
+  dark_image_url?: string; // Optional dark version
 }
 
 // Mock data for illustrations to populate the grid
@@ -25,9 +26,17 @@ export default function IllustrationsLibrary() {
   const [isMounted, setIsMounted] = useState(false);
   const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("all");
   const [isLoading, setIsLoading] = useState(false);
-  const [showUploadWarning, setShowUploadWarning] = useState(false);
-  const [skipUploadWarning, setSkipUploadWarning] = useState(false);
+  
+  // New Upload Modal States
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadStep, setUploadStep] = useState<"method" | "light" | "ask-dark" | "dark" | "complete">("method");
+  const [tempLightUrl, setTempLightUrl] = useState<string | null>(null);
+  const [tempDarkUrl, setTempDarkUrl] = useState<string | null>(null);
+  const [tempName, setTempName] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const darkFileInputRef = useRef<HTMLInputElement>(null);
 
   // Load illustrations from Supabase on mount
   useEffect(() => {
@@ -48,12 +57,12 @@ export default function IllustrationsLibrary() {
     }
   };
 
-  // Remove saving to localStorage
-  // useEffect(() => {
-  //   if (isMounted) {
-  //     localStorage.setItem("graphicsLabIllustrations", JSON.stringify(illustrations));
-  //   }
-  // }, [illustrations, isMounted]);
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem("graphicsLabIllustrations", JSON.stringify(illustrations));
+      window.dispatchEvent(new Event("storage"));
+    }
+  }, [illustrations, isMounted]);
 
   // Sync dark mode class with filterMode
   useEffect(() => {
@@ -78,44 +87,93 @@ export default function IllustrationsLibrary() {
 
   const selectedIllustration = illustrations.find(i => i.id === selectedId) || null;
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // New Upload Handlers
+  const handleLightUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const fileName = `${Date.now()}_${file.name}`;
-      setIsLoading(true);
-      
-      // 1. Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('illustrations_storage')
-        .upload(fileName, file);
+    if (!file) return;
 
-      if (uploadError) {
-        alert(`Upload error: ${uploadError.message}`);
-        setIsLoading(false);
-        return;
-      }
+    setTempName(file.name.split('.').slice(0, -1).join('.') || file.name);
+    setIsLoading(true);
+    
+    const fileName = `light_${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage
+      .from('illustrations_storage')
+      .upload(fileName, file);
 
-      // 2. Get Public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('illustrations_storage')
-        .getPublicUrl(fileName);
-
-      // 3. Insert into Database
-      const { data: dbData, error: dbError } = await supabase
-        .from('illustrations')
-        .insert([{ 
-          name: file.name.split('.').slice(0, -1).join('.') || file.name,
-          image_url: publicUrl 
-        }])
-        .select();
-
+    if (error) {
+      alert(`Upload error: ${error.message}`);
       setIsLoading(false);
-      if (dbError) {
-        alert(`DB error: ${dbError.message}`);
-      } else if (dbData) {
-        setIllustrations([dbData[0], ...illustrations]);
-      }
+      return;
     }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('illustrations_storage')
+      .getPublicUrl(fileName);
+
+    setTempLightUrl(publicUrl);
+    setIsLoading(false);
+    setUploadStep("ask-dark");
+  };
+
+  const handleDarkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsLoading(true);
+    const fileName = `dark_${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage
+      .from('illustrations_storage')
+      .upload(fileName, file);
+
+    if (error) {
+      alert(`Upload error: ${error.message}`);
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('illustrations_storage')
+      .getPublicUrl(fileName);
+
+    setTempDarkUrl(publicUrl);
+    setIsLoading(false);
+    setUploadStep("complete");
+  };
+
+  const finalizeUpload = async () => {
+    if (!tempLightUrl) return;
+
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('illustrations')
+      .insert([{
+        name: tempName,
+        image_url: tempLightUrl,
+        dark_image_url: tempDarkUrl
+      }])
+      .select();
+
+    setIsLoading(false);
+    if (error) {
+      alert(`DB error: ${error.message}`);
+    } else if (data) {
+      setIllustrations([data[0], ...illustrations]);
+      setShowUploadModal(false);
+      resetUploadState();
+      setSelectedId(data[0].id);
+    }
+  };
+
+  const resetUploadState = () => {
+    setUploadStep("method");
+    setTempLightUrl(null);
+    setTempDarkUrl(null);
+    setTempName("");
+    setUploadProgress(0);
+  };
+
+  const triggerFileUpload = () => {
+    setShowUploadModal(true);
   };
 
   const handleCardClick = (id: number) => {
@@ -125,23 +183,6 @@ export default function IllustrationsLibrary() {
       setSelectedId(id);
       setIsLoading(false);
     }, 400);
-  };
-
-  const triggerFileUpload = () => {
-    const isDonNotShowAgain = localStorage.getItem("graphicsLabSkipUploadWarning") === "true";
-    if (isDonNotShowAgain) {
-      fileInputRef.current?.click();
-    } else {
-      setShowUploadWarning(true);
-    }
-  };
-
-  const handleConfirmUpload = () => {
-    if (skipUploadWarning) {
-      localStorage.setItem("graphicsLabSkipUploadWarning", "true");
-    }
-    setShowUploadWarning(false);
-    fileInputRef.current?.click();
   };
 
   const handleDeleteIllustration = async (id: number) => {
@@ -180,94 +221,99 @@ export default function IllustrationsLibrary() {
     <main style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "0 20px 40px", position: "relative" }}>
       {isLoading && <LoadingOverlay message="Uploading Illustration..." />}
 
-      {/* Upload Warning Popup */}
-      {showUploadWarning && (
+      {/* Structured Upload Modal */}
+      {showUploadModal && (
         <div style={{
-          position: "fixed",
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          backdropFilter: "blur(8px)",
-          zIndex: 9999,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "20px"
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", zIndex: 9999,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: "20px"
         }}>
           <div style={{
-            backgroundColor: "var(--background)",
-            padding: "32px",
-            borderRadius: "24px",
-            width: "100%",
-            maxWidth: "400px",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            border: "1px solid var(--border-color)"
+            backgroundColor: "var(--background)", padding: "32px", borderRadius: "24px",
+            width: "100%", maxWidth: "450px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            display: "flex", flexDirection: "column", gap: "24px", border: "1px solid var(--border-color)",
           }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ 
-                width: "64px", 
-                height: "64px", 
-                backgroundColor: "#fef3c7", 
-                borderRadius: "50%", 
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center",
-                margin: "0 auto 16px",
-                color: "#d97706"
-              }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                  <line x1="12" y1="9" x2="12" y2="13"></line>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-              </div>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, margin: "0 0 8px 0", color: "var(--text-primary)" }}>Upload Tips</h3>
-              <p style={{ fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.5", margin: 0 }}>
-                Upload in <b>SVG</b> for higher resolution images and better scalability.
-              </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>
+                {uploadStep === "method" && "Select Upload Method"}
+                {uploadStep === "light" && "Upload Light Version"}
+                {uploadStep === "ask-dark" && "Add Dark Version?"}
+                {uploadStep === "dark" && "Upload Dark Version"}
+                {uploadStep === "complete" && "Ready to Publish"}
+              </h3>
+              <button onClick={() => { setShowUploadModal(false); resetUploadState(); }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-secondary)", fontSize: "24px" }}>&times;</button>
             </div>
 
-            <label style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "10px", 
-              cursor: "pointer",
-              fontSize: "14px",
-              color: "var(--text-secondary)",
-              userSelect: "none"
-            }}>
-              <input 
-                type="checkbox" 
-                checked={skipUploadWarning}
-                onChange={(e) => setSkipUploadWarning(e.target.checked)}
-                style={{ width: "18px", height: "18px", accentColor: "#7c3aed", cursor: "pointer" }}
-              />
-              Don't show me again
-            </label>
+            <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: 0 }}>
+              Upload in <b>SVG</b> for the best quality and resolution.
+            </p>
 
-            <button 
-              onClick={handleConfirmUpload}
-              style={{
-                width: "100%",
-                height: "48px",
-                backgroundColor: "#7c3aed",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontWeight: 700,
-                cursor: "pointer",
-                transition: "background-color 0.2s ease",
-                boxShadow: "0 4px 12px rgba(124,58,237,0.3)"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#6d28d9"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#7c3aed"}
-            >
-              Okay
-            </button>
+            {uploadStep === "method" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <button 
+                  onClick={() => setUploadStep("light")}
+                  style={{ height: "56px", backgroundColor: "var(--input-bg)", border: "1px solid var(--border-color)", borderRadius: "14px", display: "flex", alignItems: "center", padding: "0 20px", gap: "12px", cursor: "pointer" }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>Upload from computer</span>
+                </button>
+                <button 
+                  onClick={() => alert("Zoho Drive integration coming soon!")}
+                  style={{ height: "56px", backgroundColor: "var(--input-bg)", border: "1px solid var(--border-color)", borderRadius: "14px", display: "flex", alignItems: "center", padding: "0 20px", gap: "12px", cursor: "pointer" }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                  <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>Upload from Zoho Drive</span>
+                </button>
+              </div>
+            )}
+
+            {uploadStep === "light" && (
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                style={{ height: "160px", border: "2px dashed var(--border-color)", borderRadius: "16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", cursor: "pointer", backgroundColor: "var(--input-bg)" }}
+              >
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5"><path d="M12 5v14M5 12h14"></path></svg>
+                <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Choose Light illustration</span>
+              </div>
+            )}
+
+            {uploadStep === "ask-dark" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ padding: "16px", backgroundColor: "#f0fdf4", borderRadius: "12px", display: "flex", alignItems: "center", gap: "12px", border: "1px solid #bbf7d0" }}>
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                   <span style={{ color: "#166534", fontSize: "14px", fontWeight: 600 }}>Light version uploaded</span>
+                </div>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button onClick={() => setUploadStep("complete")} style={{ flex: 1, height: "48px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "none", color: "var(--text-primary)", fontWeight: 600, cursor: "pointer" }}>No dark version</button>
+                  <button onClick={() => setUploadStep("dark")} style={{ flex: 1, height: "48px", borderRadius: "12px", background: "#7c3aed", color: "#ffffff", border: "none", fontWeight: 700, cursor: "pointer" }}>Add dark version</button>
+                </div>
+              </div>
+            )}
+
+            {uploadStep === "dark" && (
+              <div 
+                onClick={() => darkFileInputRef.current?.click()}
+                style={{ height: "160px", border: "2px dashed var(--border-color)", borderRadius: "16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", cursor: "pointer", backgroundColor: "var(--input-bg)" }}
+              >
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>Choose Dark illustration</span>
+              </div>
+            )}
+
+            {uploadStep === "complete" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ textAlign: "center", color: "#16a34a" }}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ margin: "0 auto 12px" }}><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <p style={{ margin: 0, fontWeight: 700 }}>Great! Versions are ready.</p>
+                </div>
+                <button 
+                  onClick={finalizeUpload}
+                  style={{ height: "48px", borderRadius: "12px", background: "#7c3aed", color: "#ffffff", border: "none", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+                >
+                  Confirm & Publish
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -282,7 +328,14 @@ export default function IllustrationsLibrary() {
         type="file" 
         accept="image/*" 
         ref={fileInputRef} 
-        onChange={handleFileUpload} 
+        onChange={handleLightUpload} 
+        style={{ display: "none" }} 
+      />
+      <input 
+        type="file" 
+        accept="image/*" 
+        ref={darkFileInputRef} 
+        onChange={handleDarkUpload} 
         style={{ display: "none" }} 
       />
 
