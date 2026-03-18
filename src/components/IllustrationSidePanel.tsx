@@ -1,26 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-
-interface Illustration {
-  id: number;
-  name: string;
-  image: string;
-  image_url: string;
-  dark_image_url?: string;
-}
-
-interface Comment {
-  id: number;
-  illustration_id: number;
-  user_name: string;
-  user_email: string;
-  user_team: string;
-  text: string;
-  timestamp: number;
-}
+import { Illustration, Comment } from "@/types/illustration";
+import IllustrationPreview from "./illustration-panel/IllustrationPreview";
+import CommentsList from "./illustration-panel/CommentsList";
+import AuthPopup from "./illustration-panel/AuthPopup";
+import CommentPopup from "./illustration-panel/CommentPopup";
 
 interface IllustrationSidePanelProps {
   illustration: Illustration | null;
@@ -38,24 +24,19 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [isDarkPreview, setIsDarkPreview] = useState(false);
-
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
 
-  // Load user info and bookmarks/comments
   useEffect(() => {
     if (illustration) {
-      // User Info (Keep local)
       const storedUser = localStorage.getItem("graphicsLabCommentUser");
       if (storedUser) setUserInfo(JSON.parse(storedUser));
 
-      // Bookmarks (Keep local)
       const storedBookmarks = localStorage.getItem("graphicsLabBookmarks");
       if (storedBookmarks) {
         const bookmarks = JSON.parse(storedBookmarks);
         setIsBookmarked(bookmarks.includes(illustration.id));
       }
 
-      // Fetch Comments from Supabase
       fetchComments();
     }
   }, [illustration]);
@@ -79,13 +60,10 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
 
   const handleCopyName = () => {
     navigator.clipboard.writeText(illustration.name);
-    // Simple alert or toast could go here
     alert("Name copied to clipboard!");
   };
 
   const handleCopySVG = () => {
-    // For a base64 image, we can't easily "get SVG" unless it was uploaded as one.
-    // If it's a data:image/svg+xml;base64,... we can decode it.
     if (illustration.image.startsWith("data:image/svg+xml")) {
       const svgContent = atob(illustration.image.split(",")[1]);
       navigator.clipboard.writeText(svgContent);
@@ -105,7 +83,6 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     }
     localStorage.setItem("graphicsLabBookmarks", JSON.stringify(newBookmarks));
     setIsBookmarked(!isBookmarked);
-    // Trigger storage event for Navbar sync
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -125,8 +102,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
         link.download = `${illustration.name}_${selectedSize}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-        
-        // Record download in localStorage (Local history)
+
         const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
         if (!storedDownloads.some((i: any) => i.id === illustration.id)) {
           localStorage.setItem("graphicsLabDownloaded", JSON.stringify([illustration, ...storedDownloads]));
@@ -137,16 +113,15 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
   };
 
   const downloadSVG = () => {
-    const isSvg = (illustration.image_url && illustration.image_url.toLowerCase().endsWith('.svg')) || 
+    const isSvg = (illustration.image_url && illustration.image_url.toLowerCase().endsWith('.svg')) ||
                   illustration.image.startsWith("data:image/svg+xml");
-    
+
     if (isSvg) {
       const link = document.createElement("a");
       link.download = `${illustration.name}${isDarkPreview ? '_dark' : ''}.svg`;
       link.href = (isDarkPreview && illustration.dark_image_url) ? illustration.dark_image_url : (illustration.image_url || illustration.image);
       link.click();
 
-      // Record download in localStorage (Local history)
       const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
       if (!storedDownloads.some((i: any) => i.id === illustration.id)) {
         localStorage.setItem("graphicsLabDownloaded", JSON.stringify([illustration, ...storedDownloads]));
@@ -184,7 +159,6 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
     if (!userInfo || !illustration) return;
 
     if (editingCommentId !== null) {
-      // Update in Supabase
       const { error } = await supabase
         .from('comments')
         .update({ text: commentText })
@@ -195,7 +169,6 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
         return;
       }
     } else {
-      // Insert into Supabase
       const { error } = await supabase
         .from('comments')
         .insert([{
@@ -213,9 +186,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
       }
     }
 
-    // Refresh comments from DB
     await fetchComments();
-    
     setCommentText("");
     setEditingCommentId(null);
     setShowCommentPopup(false);
@@ -254,41 +225,14 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
   return (
     <>
       {/* Backdrop */}
-      <div 
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.4)",
-          zIndex: 3000,
-          backdropFilter: "blur(4px)",
-          transition: "opacity 0.3s ease"
-        }}
-      />
+      <div onClick={onClose} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 3000, backdropFilter: "blur(4px)", transition: "opacity 0.3s ease" }} />
 
       {/* Side Panel */}
-      <div style={{
-        position: "fixed",
-        top: 0, right: 0, bottom: 0,
-        width: "100%", maxWidth: "450px",
-        backgroundColor: "var(--background)",
-        zIndex: 3100,
-        boxShadow: "-10px 0 30px rgba(0,0,0,0.1)",
-        display: "flex",
-        flexDirection: "column",
-        overflowY: "auto",
-        animation: "slideIn 0.3s ease-out"
-      }}>
+      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "100%", maxWidth: "450px", backgroundColor: "var(--background)", zIndex: 3100, boxShadow: "-10px 0 30px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", overflowY: "auto", animation: "slideIn 0.3s ease-out" }}>
         {/* Header */}
         <div style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button 
-            onClick={() => {
-              if (isDarkPreview) {
-                setIsDarkPreview(false);
-              } else {
-                onClose();
-              }
-            }} 
+          <button
+            onClick={() => isDarkPreview ? setIsDarkPreview(false) : onClose()}
             style={{ display: "flex", alignItems: "center", gap: "8px", background: "none", border: "none", cursor: "pointer", color: "var(--text-primary)", padding: 0 }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -303,60 +247,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
 
         {/* Content */}
         <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
-          {/* Preview */}
-          <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", backgroundColor: isDarkPreview ? "#1e1b4b" : "var(--card-bg)", borderRadius: "16px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border-color)", transition: "background-color 0.3s ease" }}>
-            {illustration.dark_image_url && (
-              <div style={{
-                position: "absolute",
-                top: "12px",
-                right: "12px",
-                display: "flex",
-                backgroundColor: "var(--background)",
-                padding: "4px",
-                borderRadius: "20px",
-                border: "1px solid var(--border-color)",
-                zIndex: 10
-              }}>
-                <button 
-                  onClick={() => setIsDarkPreview(false)}
-                  style={{
-                    padding: "6px 16px",
-                    borderRadius: "16px",
-                    border: "none",
-                    backgroundColor: !isDarkPreview ? "#7c3aed" : "transparent",
-                    color: !isDarkPreview ? "#ffffff" : "var(--text-secondary)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  Light
-                </button>
-                <button 
-                  onClick={() => setIsDarkPreview(true)}
-                  style={{
-                    padding: "6px 16px",
-                    borderRadius: "16px",
-                    border: "none",
-                    backgroundColor: isDarkPreview ? "#7c3aed" : "transparent",
-                    color: isDarkPreview ? "#ffffff" : "var(--text-secondary)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  Dark
-                </button>
-              </div>
-            )}
-            <img 
-              src={(isDarkPreview && illustration.dark_image_url) ? illustration.dark_image_url : (illustration.image_url || illustration.image)} 
-              alt={illustration.name} 
-              style={{ maxWidth: "80%", maxHeight: "80%", objectFit: "contain", transition: "all 0.3s ease" }} 
-            />
-          </div>
+          <IllustrationPreview illustration={illustration} isDarkPreview={isDarkPreview} onTogglePreview={setIsDarkPreview} />
 
           {/* Name & Copy */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -379,7 +270,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
           {/* PNG Download row */}
           <div style={{ display: "flex", gap: "12px" }}>
             <div style={{ position: "relative", flex: 1 }}>
-              <select 
+              <select
                 value={selectedSize}
                 onChange={(e) => setSelectedSize(e.target.value as any)}
                 style={{ width: "100%", height: "48px", padding: "0 16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px", outline: "none", appearance: "none" }}
@@ -398,110 +289,35 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
           </div>
 
           {/* Delete Action */}
-          <button 
+          <button
             onClick={handleDeleteIllustration}
-            style={{ 
-              marginTop: "8px",
-              padding: "12px", 
-              borderRadius: "12px", 
-              border: "1px solid #fee2e2", 
-              background: "#fef2f2", 
-              color: "#ef4444", 
-              fontWeight: 600, 
-              cursor: "pointer", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
-              gap: "8px",
-              transition: "all 0.2s ease"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#fee2e2";
-              e.currentTarget.style.borderColor = "#fecaca";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#fef2f2";
-              e.currentTarget.style.borderColor = "#fee2e2";
-            }}
+            style={{ marginTop: "8px", padding: "12px", borderRadius: "12px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#ef4444", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", transition: "all 0.2s ease" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#fee2e2"; e.currentTarget.style.borderColor = "#fecaca"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "#fef2f2"; e.currentTarget.style.borderColor = "#fee2e2"; }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             Delete Illustration
           </button>
 
-          {/* Comments Section */}
-          <div style={{ marginTop: "16px", borderTop: "1px solid var(--border-color)", paddingTop: "24px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Comments ({comments.length})</h3>
-              <button 
-                onClick={handleAddCommentClick}
-                style={{ background: "#7c3aed", color: "#ffffff", border: "none", borderRadius: "20px", padding: "8px 16px", fontWeight: 600, fontSize: "14px", cursor: "pointer" }}
-              >
-                Add Comment
-              </button>
-            </div>
-
-            {successMessage && <div style={{ backgroundColor: "#dcfce7", color: "#166534", padding: "12px", borderRadius: "8px", marginBottom: "16px", fontSize: "14px" }}>{successMessage}</div>}
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {comments.map(comment => (
-                <div key={comment.id} style={{ backgroundColor: "var(--card-bg)", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "14px" }}>{comment.user_name}</div>
-                      <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>{comment.user_team} • {new Date(comment.timestamp).toLocaleDateString()}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button onClick={() => handleEditComment(comment)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-secondary)" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                      </button>
-                      <button onClick={() => handleDeleteComment(comment.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                      </button>
-                    </div>
-                  </div>
-                  <p style={{ margin: 0, fontSize: "14px", color: "var(--text-primary)", lineHeight: "1.5" }}>{comment.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CommentsList
+            comments={comments}
+            successMessage={successMessage}
+            onAddComment={handleAddCommentClick}
+            onEdit={handleEditComment}
+            onDelete={handleDeleteComment}
+          />
         </div>
       </div>
 
-      {/* Auth Popup */}
-      {showAuthPopup && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 4000, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div style={{ backgroundColor: "var(--background)", padding: "32px", borderRadius: "24px", width: "100%", maxWidth: "400px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "24px" }}>Verify Identity</h3>
-            <form onSubmit={handleAuthSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <input name="name" placeholder="Full Name" required style={{ height: "48px", padding: "0 16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px" }} />
-              <input name="email" type="email" placeholder="Email Address" required style={{ height: "48px", padding: "0 16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px" }} />
-              <input name="team" placeholder="Team Name" required style={{ height: "48px", padding: "0 16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px" }} />
-              <button type="submit" style={{ height: "48px", background: "#7c3aed", color: "#ffffff", border: "none", borderRadius: "12px", fontWeight: 700, cursor: "pointer", marginTop: "8px" }}>Continue</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Comment Popup */}
+      {showAuthPopup && <AuthPopup onSubmit={handleAuthSubmit} />}
       {showCommentPopup && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 4000, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div style={{ backgroundColor: "var(--background)", padding: "32px", borderRadius: "24px", width: "100%", maxWidth: "500px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "24px" }}>{editingCommentId ? "Edit Comment" : "Add Comment"}</h3>
-            <form onSubmit={handleCommentSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <textarea 
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="What's on your mind?"
-                required
-                style={{ height: "150px", padding: "16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px", resize: "none" }}
-              />
-              <div style={{ display: "flex", gap: "12px" }}>
-                <button type="button" onClick={() => { setShowCommentPopup(false); setEditingCommentId(null); setCommentText(""); }} style={{ flex: 1, height: "48px", background: "none", border: "1px solid var(--border-color)", color: "var(--text-primary)", borderRadius: "12px", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-                <button type="submit" style={{ flex: 1, height: "48px", background: "#7c3aed", color: "#ffffff", border: "none", borderRadius: "12px", fontWeight: 700, cursor: "pointer" }}>{editingCommentId ? "Save Changes" : "Submit Comment"}</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CommentPopup
+          commentText={commentText}
+          onCommentChange={setCommentText}
+          onSubmit={handleCommentSubmit}
+          onCancel={() => { setShowCommentPopup(false); setEditingCommentId(null); setCommentText(""); }}
+          isEditing={editingCommentId !== null}
+        />
       )}
 
       <style jsx global>{`
