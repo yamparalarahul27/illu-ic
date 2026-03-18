@@ -29,6 +29,7 @@ export default function Navbar() {
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingTeam, setIsEditingTeam] = useState(false);
   const [showSuccessMsg, setShowSuccessMsg] = useState(false);
+  const [isAdminOverride, setIsAdminOverride] = useState<boolean | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -75,11 +76,15 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    if (session.mode === "admin") {
-      clearAdminSession();
-    } else {
-      clearUserSession();
-    }
+    clearAdminSession();
+    localStorage.setItem("graphicsLabUserMode", "true");
+    setIsAdminOverride(false);
+  };
+
+  const handleLogin = () => {
+    clearUserSession();
+    localStorage.removeItem("graphicsLabUserMode");
+    handleCloseSidebar();
     router.push("/");
   };
 
@@ -101,8 +106,8 @@ export default function Navbar() {
   };
 
   const displayName = session.isLoaded ? session.name : "";
-  const showAvatar = mounted && session.isLoaded && !!displayName;
   const roleCfg = session.role && ROLE_CONFIG[session.role];
+  const isAdminMode = mounted && (isAdminOverride !== null ? isAdminOverride : (session.isLoaded && session.mode === "admin"));
 
   return (
     <>
@@ -123,20 +128,24 @@ export default function Navbar() {
           )}
         </div>
 
-        {showAvatar && (
+        {mounted && (
           <div
             onClick={() => setIsSidebarOpen(true)}
             style={{
               width: "36px", height: "36px", borderRadius: "50%",
-              backgroundColor: session.mode === "admin" ? "#7c3aed" : "#6b7280",
+              backgroundColor: isAdminMode ? "#7c3aed" : "#6b7280",
               color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "16px", fontWeight: 700, cursor: "pointer",
+              fontSize: displayName ? "16px" : "20px", fontWeight: 700, cursor: "pointer",
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)", transition: "transform 0.2s ease",
             }}
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
           >
-            {displayName.charAt(0).toUpperCase()}
+            {displayName ? displayName.charAt(0).toUpperCase() : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            )}
           </div>
         )}
       </header>
@@ -162,7 +171,9 @@ export default function Navbar() {
             onToggleDarkMode={toggleDarkMode}
             isAdmin={can.seeAdminDashboard(session.role)}
             onNavigateToAdmin={() => handleNavigation("/admin")}
+            isAdminMode={isAdminMode}
             onLogout={handleLogout}
+            onLogin={handleLogin}
           />
         ) : sidebarView === "profile" ? (
           <SidebarProfileView
