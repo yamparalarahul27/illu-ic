@@ -59,7 +59,15 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
   if (!illustration) return null;
 
   const handleCopyName = () => {
-    navigator.clipboard.writeText(illustration.name);
+    let displayName = illustration.name;
+    if (isDarkPreview && illustration.dark_image_url) {
+      if (illustration.name.toLowerCase().includes("_light")) {
+        displayName = illustration.name.replace(/_light/i, "_dark");
+      } else {
+        displayName = illustration.name + "_dark";
+      }
+    }
+    navigator.clipboard.writeText(displayName);
     alert("Name copied to clipboard!");
   };
 
@@ -251,7 +259,19 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete 
 
           {/* Name & Copy */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>{illustration.name}</h2>
+            <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              {(() => {
+                if (isDarkPreview && illustration.dark_image_url) {
+                  // Replace _light -> _dark in the name
+                  if (illustration.name.toLowerCase().includes("_light")) {
+                    return illustration.name.replace(/_light/i, "_dark");
+                  }
+                  // If no _light suffix, append _dark
+                  return illustration.name + "_dark";
+                }
+                return illustration.name;
+              })()}
+            </h2>
             <button onClick={handleCopyName} title="Copy Name" style={{ background: "var(--input-bg)", border: "none", borderRadius: "8px", padding: "8px", cursor: "pointer", color: "var(--text-secondary)" }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>

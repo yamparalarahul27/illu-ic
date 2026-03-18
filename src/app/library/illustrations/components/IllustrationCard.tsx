@@ -6,9 +6,11 @@ import { Illustration } from "@/types/illustration";
 interface IllustrationCardProps {
   illustration: Illustration;
   onClick: (id: number) => void;
+  isSelected?: boolean;
+  isSelectionMode?: boolean;
 }
 
-export default function IllustrationCard({ illustration, onClick }: IllustrationCardProps) {
+export default function IllustrationCard({ illustration, onClick, isSelected, isSelectionMode }: IllustrationCardProps) {
   return (
     <div
       onClick={() => onClick(illustration.id)}
@@ -18,14 +20,36 @@ export default function IllustrationCard({ illustration, onClick }: Illustration
         borderRadius: "16px",
         backgroundColor: "var(--card-bg)",
         overflow: "hidden",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+        boxShadow: isSelected
+          ? "0 0 0 3px #7c3aed, 0 4px 20px rgba(124,58,237,0.15)"
+          : "0 4px 20px rgba(0,0,0,0.08)",
+        border: isSelected ? "2px solid #7c3aed" : "2px solid transparent",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease",
         cursor: "pointer",
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        transform: isSelected ? "scale(0.97)" : "none"
       }}
       className="illustration-card"
     >
+      {/* Checkbox overlay in selection mode */}
+      {isSelectionMode && (
+        <div style={{
+          position: "absolute", top: "12px", left: "12px", zIndex: 10,
+          width: "24px", height: "24px", borderRadius: "6px",
+          backgroundColor: isSelected ? "#7c3aed" : "rgba(255,255,255,0.85)",
+          border: `2px solid ${isSelected ? "#7c3aed" : "#d1d5db"}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all 0.2s ease", boxShadow: "0 1px 4px rgba(0,0,0,0.12)"
+        }}>
+          {isSelected && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          )}
+        </div>
+      )}
+
       <div style={{
         position: "relative",
         flex: 1,

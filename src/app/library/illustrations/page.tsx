@@ -17,6 +17,8 @@ export default function IllustrationsLibrary() {
   const [isMounted, setIsMounted] = useState(false);
   const [filterMode, setFilterMode] = useState<"light" | "dark" | "all">("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const upload = useUploadFlow((newIllustration) => {
     setIllustrations([newIllustration, ...illustrations]);
@@ -69,12 +71,47 @@ export default function IllustrationsLibrary() {
 
   const selectedIllustration = illustrations.find(i => i.id === selectedId) || null;
 
+
   const handleCardClick = (id: number) => {
+    if (isSelectionMode) {
+      // Toggle selection
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+      return;
+    }
     setIsLoading(true);
     setTimeout(() => {
       setSelectedId(id);
       setIsLoading(false);
     }, 400);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    if (!confirm(`Delete ${count} illustration${count > 1 ? 's' : ''}? This cannot be undone.`)) return;
+
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('illustrations').delete().in('id', ids);
+    if (error) {
+      alert(`Error deleting: ${error.message}`);
+      return;
+    }
+
+    // Clean up localStorage
+    const storedBookmarks = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
+    localStorage.setItem("graphicsLabBookmarks", JSON.stringify(storedBookmarks.filter((bid: number) => !ids.includes(bid))));
+    const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
+    localStorage.setItem("graphicsLabDownloaded", JSON.stringify(storedDownloads.filter((d: any) => !ids.includes(d.id))));
+
+    setIllustrations(prev => prev.filter(ill => !ids.includes(ill.id)));
+    setSelectedIds(new Set());
+    setIsSelectionMode(false);
+    window.dispatchEvent(new Event("storage"));
   };
 
   const handleDeleteIllustration = async (id: number) => {
@@ -131,6 +168,10 @@ export default function IllustrationsLibrary() {
         filterMode={filterMode}
         onFilterChange={setFilterMode}
         onUploadClick={upload.openModal}
+        isSelectionMode={isSelectionMode}
+        onToggleSelectionMode={() => { setIsSelectionMode(!isSelectionMode); setSelectedIds(new Set()); }}
+        selectedIdsCount={selectedIds.size}
+        onBulkDelete={handleBulkDelete}
       />
 
       <h1 style={{ fontSize: "32px", fontWeight: 700, margin: "16px 0 32px", color: "var(--text-primary)" }}>
@@ -144,7 +185,13 @@ export default function IllustrationsLibrary() {
       }}>
         {filteredIllustrations.length > 0 ? (
           filteredIllustrations.map((illustration) => (
-            <IllustrationCard key={illustration.id} illustration={illustration} onClick={handleCardClick} />
+            <IllustrationCard
+              key={illustration.id}
+              illustration={illustration}
+              onClick={handleCardClick}
+              isSelected={selectedIds.has(illustration.id)}
+              isSelectionMode={isSelectionMode}
+            />
           ))
         ) : (
           <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "64px 0", color: "var(--text-secondary)" }}>
