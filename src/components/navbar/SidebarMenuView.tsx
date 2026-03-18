@@ -9,9 +9,10 @@ interface SidebarMenuViewProps {
   onToggleDarkMode: () => void;
   isAdmin?: boolean;
   onNavigateToAdmin?: () => void;
+  onLogout?: () => void;
 }
 
-export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDarkMode, mounted, onToggleDarkMode, isAdmin, onNavigateToAdmin }: SidebarMenuViewProps) {
+export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDarkMode, mounted, onToggleDarkMode, isAdmin, onNavigateToAdmin, onLogout }: SidebarMenuViewProps) {
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
@@ -64,7 +65,7 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDar
             )}
           </div>
 
-          <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
+          <div onClick={onLogout} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
         </div>
       </div>
     </>

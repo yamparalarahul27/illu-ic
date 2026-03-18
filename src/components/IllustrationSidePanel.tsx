@@ -7,15 +7,18 @@ import IllustrationPreview from "./illustration-panel/IllustrationPreview";
 import CommentsList from "./illustration-panel/CommentsList";
 import AuthPopup from "./illustration-panel/AuthPopup";
 import CommentPopup from "./illustration-panel/CommentPopup";
+import { UserRole, can, STATUS_CONFIG, AssetStatus } from "@/lib/permissions";
+import { updateIllustrationStatus, updateIllustrationNameTag } from "@/lib/admin";
 
 interface IllustrationSidePanelProps {
   illustration: Illustration | null;
   onClose: () => void;
   onDelete: (id: number) => void;
-  isAdmin?: boolean;
+  role?: UserRole;
+  onIllustrationUpdate?: (id: number, fields: Partial<Illustration>) => void;
 }
 
-export default function IllustrationSidePanel({ illustration, onClose, onDelete, isAdmin }: IllustrationSidePanelProps) {
+export default function IllustrationSidePanel({ illustration, onClose, onDelete, role = 'USER', onIllustrationUpdate }: IllustrationSidePanelProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [selectedSize, setSelectedSize] = useState<"1x" | "2x" | "3x">("1x");
   const [showAuthPopup, setShowAuthPopup] = useState(false);
@@ -26,6 +29,12 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
   const [successMessage, setSuccessMessage] = useState("");
   const [isDarkPreview, setIsDarkPreview] = useState(false);
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
+  const [nameTag, setNameTag] = useState("");
+  const [savingTag, setSavingTag] = useState(false);
+
+  const canDelete = can.delete(role);
+  const canAssignStatus = can.assignStatusTag(role);
+  const canAssignNameTag = can.assignNameTag(role);
 
   useEffect(() => {
     if (illustration) {
@@ -38,9 +47,24 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
         setIsBookmarked(bookmarks.includes(illustration.id));
       }
 
+      setNameTag(illustration.name_tag ?? "");
       fetchComments();
     }
   }, [illustration]);
+
+  const handleStatusChange = async (status: string) => {
+    if (!illustration) return;
+    await updateIllustrationStatus(illustration.id, status);
+    onIllustrationUpdate?.(illustration.id, { status: status as AssetStatus });
+  };
+
+  const handleSaveNameTag = async () => {
+    if (!illustration) return;
+    setSavingTag(true);
+    await updateIllustrationNameTag(illustration.id, nameTag.trim());
+    onIllustrationUpdate?.(illustration.id, { name_tag: nameTag.trim() });
+    setSavingTag(false);
+  };
 
   const fetchComments = async () => {
     if (!illustration) return;
@@ -302,8 +326,53 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
             </button>
           </div>
 
-          {/* Delete Action — admin only */}
-          {isAdmin && (
+          {/* Status tag — superadmin only */}
+          {canAssignStatus && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Status Tag</label>
+              <div style={{ position: "relative" }}>
+                <select
+                  value={illustration.status ?? ""}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  style={{ width: "100%", height: "48px", padding: "0 16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "15px", outline: "none", appearance: "none", cursor: "pointer" }}
+                >
+                  <option value="">— No Status —</option>
+                  {(Object.keys(STATUS_CONFIG) as AssetStatus[]).map((s) => (
+                    <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+                  ))}
+                </select>
+                <div style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-secondary)" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Name tag — creator + superadmin */}
+          {canAssignNameTag && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Name Tag</label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  value={nameTag}
+                  onChange={(e) => setNameTag(e.target.value)}
+                  placeholder="e.g. onboarding, error-state"
+                  style={{ flex: 1, height: "48px", padding: "0 16px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "15px", outline: "none" }}
+                />
+                <button
+                  onClick={handleSaveNameTag}
+                  disabled={savingTag}
+                  style={{ height: "48px", padding: "0 20px", borderRadius: "12px", background: "#7c3aed", color: "#fff", fontWeight: 700, border: "none", cursor: savingTag ? "not-allowed" : "pointer", opacity: savingTag ? 0.7 : 1, fontSize: "14px", whiteSpace: "nowrap" }}
+                >
+                  {savingTag ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Action — creator + superadmin */}
+          {canDelete && (
             <button
               onClick={handleDeleteIllustration}
               style={{ marginTop: "8px", padding: "12px", borderRadius: "12px", border: "1px solid #fee2e2", background: "#fef2f2", color: "#ef4444", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", transition: "all 0.2s ease" }}
@@ -325,7 +394,7 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
         </div>
       </div>
 
-      {showAuthPopup && <AuthPopup onSubmit={handleAuthSubmit} />}
+      {showAuthPopup && <AuthPopup onSubmit={handleAuthSubmit} onClose={() => setShowAuthPopup(false)} />}
       {showCommentPopup && (
         <CommentPopup
           commentText={commentText}

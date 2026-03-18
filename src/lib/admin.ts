@@ -1,86 +1,64 @@
 import { supabase } from './supabase';
+import { SUPER_ADMIN_EMAIL, UserRole } from './permissions';
 
-const SUPER_ADMIN_EMAIL = 'shaina@equicomtech.com';
-
-export async function checkIsAdmin(email: string): Promise<boolean> {
-  if (!email) return false;
-  const normalized = email.toLowerCase().trim();
-  if (normalized === SUPER_ADMIN_EMAIL) return true;
-  const { data, error } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('email', normalized)
-    .maybeSingle();
-  if (error) return false;
-  return !!data;
+// ── Session shape stored in localStorage ──────────────────────────────────────
+export interface AdminSessionData {
+  email: string;
+  name: string;
+  role: UserRole;
 }
 
-export async function addAdminDirectly(email: string, name: string) {
+// ── Validate admin email (used on login) ──────────────────────────────────────
+export async function validateAdminEmail(email: string): Promise<AdminSessionData | null> {
+  const normalized = email.toLowerCase().trim();
+  if (normalized === SUPER_ADMIN_EMAIL) {
+    return { email: normalized, name: 'Shaina', role: 'SUPERADMIN' };
+  }
+  const { data, error } = await supabase
+    .from('admins')
+    .select('id, email, name, role, status')
+    .eq('email', normalized)
+    .maybeSingle();
+  if (error || !data) return null;
+  if (data.status === 'inactive') return null;
+  return { email: data.email, name: data.name ?? email, role: data.role ?? 'MANAGER' };
+}
+
+// ── Admin CRUD ─────────────────────────────────────────────────────────────────
+export async function addAdminDirectly(email: string, name: string, role: UserRole = 'MANAGER') {
   const { error } = await supabase
     .from('admins')
-    .upsert([{ email: email.toLowerCase().trim(), name }], { onConflict: 'email' });
+    .upsert([{ email: email.toLowerCase().trim(), name, role, status: 'active' }], { onConflict: 'email' });
   return { error };
 }
 
-export async function sendOTP(email: string) {
-  const code = Math.floor(1000 + Math.random() * 9000).toString();
-  const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 mins
-
+export async function updateAdminRole(adminId: string, role: UserRole) {
   const { error } = await supabase
-    .from('admin_otps')
-    .upsert([{ email: email.toLowerCase().trim(), code, expires_at }], { onConflict: 'email' });
-
-  if (!error) {
-    // [DEBUG] Log OTP to console for testing without email service
-    console.log(`[AUTH] OTP for ${email}: ${code}`);
-    
-    // In a real app, you'd trigger an EmailJS or similar service here
-    /*
-    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
-      otp_code: code,
-      to_email: email,
-    });
-    */
-  }
-
-  return { error, code };
-}
-
-export async function verifyOTP(email: string, code: string, name: string) {
-  const { data, error } = await supabase
-    .from('admin_otps')
-    .select('*')
-    .eq('email', email.toLowerCase().trim())
-    .eq('code', code)
-    .single();
-
-  if (error || !data) {
-    return { error: "Invalid or expired code" };
-  }
-
-  const now = new Date();
-  if (new Date(data.expires_at) < now) {
-    return { error: "Code has expired" };
-  }
-
-  // OTP is valid, add to admins
-  const { error: adminError } = await supabase
     .from('admins')
-    .upsert([{ email: email.toLowerCase().trim(), name }], { onConflict: 'email' });
-
-  if (adminError) return { error: adminError };
-
-  // Delete OTP after successful verification
-  await supabase.from('admin_otps').delete().eq('email', email.toLowerCase().trim());
-
-  return { success: true };
+    .update({ role })
+    .eq('id', adminId);
+  return { error };
 }
 
+export async function toggleAdminStatus(adminId: string, status: 'active' | 'inactive') {
+  const { error } = await supabase
+    .from('admins')
+    .update({ status })
+    .eq('id', adminId);
+  return { error };
+}
+
+export async function getAllAdmins() {
+  const { data, error } = await supabase
+    .from('admins')
+    .select('*')
+    .order('created_at', { ascending: false });
+  return { data, error };
+}
+
+// ── Admin requests ─────────────────────────────────────────────────────────────
 export async function submitAdminRequest(payload: {
-  name: string;
-  email: string;
-  team: string;
-  reason: string;
+  name: string; email: string; team: string; reason: string;
 }) {
   const { error } = await supabase.from('admin_requests').insert([{
     name: payload.name,
@@ -101,10 +79,8 @@ export async function getPendingRequests() {
   return { data, error };
 }
 
-export async function approveRequest(requestId: number, email: string, name: string) {
-  // 1. Insert into admins table
-  await supabase.from('admins').upsert([{ email: email.toLowerCase().trim(), name }]);
-  // 2. Mark request as approved
+export async function approveRequest(requestId: number, email: string, name: string, role: UserRole = 'MANAGER') {
+  await supabase.from('admins').upsert([{ email: email.toLowerCase().trim(), name, role, status: 'active' }], { onConflict: 'email' });
   const { error } = await supabase
     .from('admin_requests')
     .update({ status: 'approved' })
@@ -117,5 +93,22 @@ export async function rejectRequest(requestId: number) {
     .from('admin_requests')
     .update({ status: 'rejected' })
     .eq('id', requestId);
+  return { error };
+}
+
+// ── Illustration status / name tag ─────────────────────────────────────────────
+export async function updateIllustrationStatus(id: number, status: string) {
+  const { error } = await supabase
+    .from('illustrations')
+    .update({ status })
+    .eq('id', id);
+  return { error };
+}
+
+export async function updateIllustrationNameTag(id: number, name_tag: string) {
+  const { error } = await supabase
+    .from('illustrations')
+    .update({ name_tag })
+    .eq('id', id);
   return { error };
 }

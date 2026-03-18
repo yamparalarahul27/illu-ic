@@ -1,121 +1,94 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function EntryScreen() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [isChecking, setIsChecking] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const storedName = localStorage.getItem("graphicsLabUserName");
-    if (storedName) {
-      router.push("/dashboard");
-    } else {
-      setIsChecking(false);
+    setMounted(true);
+    // Returning session — already handled by SplashScreen redirect,
+    // but guard here too for direct /  navigation without splash
+    const adminSession = localStorage.getItem('graphicsLabAdminSession');
+    const userMode = localStorage.getItem('graphicsLabUserMode');
+    if (adminSession || userMode) {
+      router.replace('/dashboard');
     }
   }, [router]);
 
-  const handleGetStarted = () => {
-    if (!name.trim()) return;
-    localStorage.setItem("graphicsLabUserName", name.trim());
-    // Route to Dashboard. Pass name via URL parameter.
-    router.push(`/dashboard?name=${encodeURIComponent(name.trim())}`);
+  const handleLaunchApp = () => {
+    localStorage.setItem('graphicsLabUserMode', 'true');
+    router.push('/dashboard');
   };
 
-  if (isChecking) {
-    return <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}></main>;
-  }
+  const handleAdminLogin = () => {
+    router.push('/admin/login');
+  };
+
+  if (!mounted) return null;
 
   return (
-    <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ 
-        display: "flex", 
-        flexDirection: "column", 
-        gap: "24px", 
-        alignItems: "center",
-        maxWidth: "400px",
-        width: "100%",
-        padding: "40px",
-        borderRadius: "12px",
-        backgroundColor: "rgba(255, 255, 255, 0.05)",
-        backdropFilter: "blur(10px)",
-        border: "1px solid rgba(0, 0, 0, 0.1)"
+    <main style={{
+      flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+      minHeight: "100vh", backgroundColor: "var(--background)", padding: "24px",
+    }}>
+      <div style={{
+        width: "100%", maxWidth: "420px",
+        display: "flex", flexDirection: "column", alignItems: "center", gap: "32px",
       }}>
-        <div style={{ textAlign: "center", marginBottom: "8px" }}>
-          <h1 style={{ fontSize: "18px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>
-            Onboarding
-          </h1>
-          <p style={{ fontSize: "12px", opacity: 0.6, textTransform: "uppercase" }}>
-            Please enter your details to continue
+        {/* Tagline */}
+        <div style={{ textAlign: "center" }}>
+          <p style={{ fontSize: "15px", color: "var(--text-secondary)", margin: 0, letterSpacing: "0.02em" }}>
+            Welcome to Graphics Lab
+          </p>
+          <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "6px 0 0", opacity: 0.6 }}>
+            How would you like to continue?
           </p>
         </div>
 
-        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", opacity: 0.5 }}>Name</label>
-            <input 
-              type="text" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your Full Name" 
-              style={{ 
-                padding: "12px 16px", 
-                border: "1px solid #000", 
-                borderRadius: "4px",
-                fontSize: "14px",
-                outline: "none",
-                width: "100%",
-                color: "var(--foreground)",
-                background: "transparent"
-              }} 
-            />
+        {/* Buttons */}
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "14px" }}>
+          {/* Launch App */}
+          <button
+            onClick={handleLaunchApp}
+            style={{
+              width: "100%", height: "56px", borderRadius: "16px",
+              backgroundColor: "#7c3aed", color: "#ffffff",
+              border: "none", fontWeight: 700, fontSize: "16px",
+              cursor: "pointer", letterSpacing: "0.01em",
+              boxShadow: "0 4px 16px rgba(124,58,237,0.3)",
+              transition: "transform 0.15s ease, box-shadow 0.15s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(124,58,237,0.35)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(124,58,237,0.3)"; }}
+          >
+            Launch App
+          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border-color)" }} />
+            <span style={{ fontSize: "13px", color: "var(--text-secondary)", opacity: 0.6 }}>or</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border-color)" }} />
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", opacity: 0.5 }}>Email Address</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com" 
-              style={{ 
-                padding: "12px 16px", 
-                border: "1px solid #000", 
-                borderRadius: "4px",
-                fontSize: "14px",
-                outline: "none",
-                width: "100%",
-                color: "var(--foreground)",
-                background: "transparent"
-              }} 
-            />
-          </div>
+          {/* Login as Admin */}
+          <button
+            onClick={handleAdminLogin}
+            style={{
+              width: "100%", height: "56px", borderRadius: "16px",
+              backgroundColor: "var(--input-bg)", color: "var(--text-primary)",
+              border: "1.5px solid var(--border-color)", fontWeight: 600, fontSize: "16px",
+              cursor: "pointer", letterSpacing: "0.01em",
+              transition: "border-color 0.2s ease, background-color 0.2s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "#7c3aed"; e.currentTarget.style.backgroundColor = "#f5f3ff"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.backgroundColor = "var(--input-bg)"; }}
+          >
+            🔑 Login as Admin
+          </button>
         </div>
-
-        <button 
-          onClick={handleGetStarted}
-          disabled={!name.trim()}
-          style={{
-            marginTop: "16px",
-            width: "100%",
-            padding: "14px",
-            backgroundColor: name.trim() ? "#7c3aed" : "rgba(124, 58, 237, 0.5)",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            fontSize: "12px",
-            fontWeight: 600,
-            textTransform: "uppercase",
-            cursor: name.trim() ? "pointer" : "not-allowed",
-            letterSpacing: "1px",
-            transition: "all 0.2s ease"
-          }}
-        >
-          Get Started
-        </button>
       </div>
     </main>
   );

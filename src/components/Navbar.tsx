@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import SidebarMenuView from "./navbar/SidebarMenuView";
 import SidebarProfileView from "./navbar/SidebarProfileView";
 import SidebarMediaView from "./navbar/SidebarMediaView";
-import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { useSession, clearAdminSession, clearUserSession } from "@/hooks/useSession";
+import { can, ROLE_CONFIG } from "@/lib/permissions";
 
 export default function Navbar() {
   const router = useRouter();
-  const { isAdmin } = useAdminStatus();
-  const [displayName, setDisplayName] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const session = useSession();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads">("menu");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const [savedMedia, setSavedMedia] = useState<any[]>([]);
   const [downloadedItems, setDownloadedItems] = useState<any[]>([]);
@@ -29,86 +30,28 @@ export default function Navbar() {
   const [isEditingTeam, setIsEditingTeam] = useState(false);
   const [showSuccessMsg, setShowSuccessMsg] = useState(false);
 
-  const pathname = usePathname();
-
   useEffect(() => {
     setMounted(true);
-    const params = new URLSearchParams(window.location.search);
-    const nameParam = params.get("name");
-
-    if (nameParam) {
-      const name = nameParam.trim();
-      setDisplayName(name);
-      localStorage.setItem("graphicsLabUserName", name);
-    } else {
-      const storedName = localStorage.getItem("graphicsLabUserName");
-      if (storedName) {
-        setDisplayName(storedName);
-      } else {
-        setDisplayName("");
-      }
-    }
-  }, [pathname]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedEmail = localStorage.getItem("graphicsLabUserEmail");
-      if (storedEmail) setEditEmail(storedEmail);
-
-      const storedTeam = localStorage.getItem("graphicsLabUserTeam");
-      if (storedTeam) setEditTeam(storedTeam);
+    const storedTheme = localStorage.getItem("graphicsLabTheme");
+    if (storedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
     }
   }, []);
 
   useEffect(() => {
-    if (displayName && !editName) {
-      setEditName(displayName);
+    if (session.isLoaded) {
+      setEditName(session.name);
+      setEditEmail(session.email);
+      const storedTeam = localStorage.getItem("graphicsLabUserTeam");
+      if (storedTeam) setEditTeam(storedTeam);
     }
-  }, [displayName]);
-
-  const handleUpdateProfile = () => {
-    if (editName.trim()) {
-      localStorage.setItem("graphicsLabUserName", editName.trim());
-      setDisplayName(editName.trim());
-    }
-    localStorage.setItem("graphicsLabUserEmail", editEmail.trim());
-    localStorage.setItem("graphicsLabUserTeam", editTeam.trim());
-    setIsEditingName(false);
-    setIsEditingEmail(false);
-    setIsEditingTeam(false);
-    setShowSuccessMsg(true);
-    setTimeout(() => setShowSuccessMsg(false), 3000);
-  };
-
-  const handleCloseSidebar = () => {
-    setIsSidebarOpen(false);
-    setTimeout(() => setSidebarView("menu"), 300);
-  };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("graphicsLabTheme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("graphicsLabTheme", "light");
-    }
-  };
-
-  const handleNavigation = (href: string) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      router.push(href);
-      setIsLoading(false);
-    }, 500);
-  };
+  }, [session.isLoaded, session.name, session.email]);
 
   const syncSidebarData = () => {
     const allIllustrations = JSON.parse(localStorage.getItem("graphicsLabIllustrations") || "[]");
     const bookmarkedIds = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
-    const saved = allIllustrations.filter((ill: any) => bookmarkedIds.includes(ill.id));
-    setSavedMedia(saved);
+    setSavedMedia(allIllustrations.filter((ill: any) => bookmarkedIds.includes(ill.id)));
     setDownloadedItems(JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]"));
   };
 
@@ -120,41 +63,78 @@ export default function Navbar() {
     }
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedTheme = localStorage.getItem("graphicsLabTheme");
-      if (storedTheme === "dark") {
-        setIsDarkMode(true);
-        document.documentElement.classList.add("dark");
-      }
+  const handleUpdateProfile = () => {
+    if (editName.trim()) {
+      localStorage.setItem("graphicsLabUserName", editName.trim());
     }
-  }, []);
+    localStorage.setItem("graphicsLabUserEmail", editEmail.trim());
+    localStorage.setItem("graphicsLabUserTeam", editTeam.trim());
+    setIsEditingName(false); setIsEditingEmail(false); setIsEditingTeam(false);
+    setShowSuccessMsg(true);
+    setTimeout(() => setShowSuccessMsg(false), 3000);
+  };
+
+  const handleLogout = () => {
+    if (session.mode === "admin") {
+      clearAdminSession();
+    } else {
+      clearUserSession();
+    }
+    router.push("/");
+  };
+
+  const handleCloseSidebar = () => {
+    setIsSidebarOpen(false);
+    setTimeout(() => setSidebarView("menu"), 300);
+  };
+
+  const toggleDarkMode = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("graphicsLabTheme", next ? "dark" : "light");
+  };
+
+  const handleNavigation = (href: string) => {
+    setIsLoading(true);
+    setTimeout(() => { router.push(href); setIsLoading(false); }, 500);
+  };
+
+  const displayName = session.isLoaded ? session.name : "";
+  const showAvatar = mounted && session.isLoaded && !!displayName;
+  const roleCfg = session.role && ROLE_CONFIG[session.role];
 
   return (
     <>
       {isLoading && <LoadingOverlay message="Navigating..." />}
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000, padding: "0 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <span
-            className="logo"
-            onClick={() => handleNavigation("/dashboard")}
-            style={{ cursor: "pointer" }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span className="logo" onClick={() => handleNavigation("/dashboard")} style={{ cursor: "pointer" }}>
             GRAPHICS LAB
           </span>
+          {/* Role badge for admins */}
+          {mounted && session.isLoaded && session.mode === "admin" && roleCfg && (
+            <span style={{
+              padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: 700,
+              backgroundColor: roleCfg.bg, color: roleCfg.color, letterSpacing: "0.04em",
+            }}>
+              {roleCfg.label.toUpperCase()}
+            </span>
+          )}
         </div>
 
-        {mounted && displayName && (
+        {showAvatar && (
           <div
             onClick={() => setIsSidebarOpen(true)}
             style={{
-              width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#7c3aed",
-              color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center",
+              width: "36px", height: "36px", borderRadius: "50%",
+              backgroundColor: session.mode === "admin" ? "#7c3aed" : "#6b7280",
+              color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "16px", fontWeight: 700, cursor: "pointer",
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)", transition: "transform 0.2s ease",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
           >
             {displayName.charAt(0).toUpperCase()}
           </div>
@@ -162,10 +142,7 @@ export default function Navbar() {
       </header>
 
       {isSidebarOpen && (
-        <div
-          onClick={() => setIsSidebarOpen(false)}
-          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 9999, transition: "opacity 0.3s ease" }}
-        />
+        <div onClick={() => setIsSidebarOpen(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 9999 }} />
       )}
 
       <div style={{
@@ -173,7 +150,7 @@ export default function Navbar() {
         backgroundColor: "var(--background)", boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
         zIndex: 10000, transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
         transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        display: "flex", flexDirection: "column", padding: "32px 24px"
+        display: "flex", flexDirection: "column", padding: "32px 24px",
       }}>
         {sidebarView === "menu" ? (
           <SidebarMenuView
@@ -183,8 +160,9 @@ export default function Navbar() {
             isDarkMode={isDarkMode}
             mounted={mounted}
             onToggleDarkMode={toggleDarkMode}
-            isAdmin={isAdmin}
+            isAdmin={can.seeAdminDashboard(session.role)}
             onNavigateToAdmin={() => handleNavigation("/admin")}
+            onLogout={handleLogout}
           />
         ) : sidebarView === "profile" ? (
           <SidebarProfileView
