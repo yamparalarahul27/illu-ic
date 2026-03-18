@@ -12,11 +12,12 @@ interface SearchControlBarProps {
   onToggleSelectionMode: () => void;
   selectedIdsCount: number;
   onBulkDelete: () => void;
+  isAdmin: boolean;
 }
 
 export default function SearchControlBar({
   searchQuery, onSearchChange, filterMode, onFilterChange, onUploadClick,
-  isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete
+  isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete, isAdmin
 }: SearchControlBarProps) {
 
   return (
@@ -105,49 +106,51 @@ export default function SearchControlBar({
           </button>
         </div>
       ) : (
-        /* Normal mode buttons */
-        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
-          {/* Trash icon to enter selection mode */}
-          <button
-            onClick={onToggleSelectionMode}
-            title="Select illustrations to delete"
-            style={{
-              width: "48px", height: "48px", borderRadius: "50%",
-              border: "1px solid var(--border-color)", backgroundColor: "var(--input-bg)",
-              color: "var(--text-secondary)", display: "flex", alignItems: "center",
-              justifyContent: "center", cursor: "pointer", transition: "all 0.2s ease"
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              <line x1="10" y1="11" x2="10" y2="17"></line>
-              <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-          </button>
+        /* Normal mode buttons — admin only */
+        isAdmin ? (
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
+            {/* Trash icon to enter selection mode */}
+            <button
+              onClick={onToggleSelectionMode}
+              title="Select illustrations to delete"
+              style={{
+                width: "48px", height: "48px", borderRadius: "50%",
+                border: "1px solid var(--border-color)", backgroundColor: "var(--input-bg)",
+                color: "var(--text-secondary)", display: "flex", alignItems: "center",
+                justifyContent: "center", cursor: "pointer", transition: "all 0.2s ease"
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
 
-          {/* Upload Button */}
-          <button
-            onClick={onUploadClick}
-            style={{
-              display: "flex", alignItems: "center", height: "48px", padding: "0 28px",
-              borderRadius: "24px", backgroundColor: "#7c3aed", color: "#ffffff",
-              fontWeight: 600, fontSize: "16px", border: "none", cursor: "pointer",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 6px 16px rgba(124, 58, 237, 0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.2)";
-            }}
-          >
-            Upload
-          </button>
-        </div>
+            {/* Upload Button */}
+            <button
+              onClick={onUploadClick}
+              style={{
+                display: "flex", alignItems: "center", height: "48px", padding: "0 28px",
+                borderRadius: "24px", backgroundColor: "#7c3aed", color: "#ffffff",
+                fontWeight: 600, fontSize: "16px", border: "none", cursor: "pointer",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 6px 16px rgba(124, 58, 237, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "none";
+                e.currentTarget.style.boxShadow = "0 4px 12px rgba(124, 58, 237, 0.2)";
+              }}
+            >
+              Upload
+            </button>
+          </div>
+        ) : null
       )}
     </div>
   );

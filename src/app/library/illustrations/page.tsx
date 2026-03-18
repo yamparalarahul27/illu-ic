@@ -9,8 +9,10 @@ import { useUploadFlow } from "./hooks/useUploadFlow";
 import UploadModal from "./components/UploadModal";
 import IllustrationCard from "./components/IllustrationCard";
 import SearchControlBar from "./components/SearchControlBar";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 export default function IllustrationsLibrary() {
+  const { isAdmin } = useAdminStatus();
   const [searchQuery, setSearchQuery] = useState("");
   const [illustrations, setIllustrations] = useState<Illustration[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -19,6 +21,7 @@ export default function IllustrationsLibrary() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
 
   const upload = useUploadFlow((newIllustration) => {
     setIllustrations([newIllustration, ...illustrations]);
@@ -28,6 +31,7 @@ export default function IllustrationsLibrary() {
   useEffect(() => {
     setIsMounted(true);
     fetchIllustrations();
+    fetchCommentCounts();
   }, []);
 
   const fetchIllustrations = async () => {
@@ -40,6 +44,19 @@ export default function IllustrationsLibrary() {
       console.error("Error fetching illustrations:", error);
     } else if (data) {
       setIllustrations(data);
+    }
+  };
+
+  const fetchCommentCounts = async () => {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('illustration_id');
+    if (!error && data) {
+      const counts: Record<number, number> = {};
+      (data as { illustration_id: number }[]).forEach((row) => {
+        counts[row.illustration_id] = (counts[row.illustration_id] || 0) + 1;
+      });
+      setCommentCounts(counts);
     }
   };
 
@@ -172,6 +189,7 @@ export default function IllustrationsLibrary() {
         onToggleSelectionMode={() => { setIsSelectionMode(!isSelectionMode); setSelectedIds(new Set()); }}
         selectedIdsCount={selectedIds.size}
         onBulkDelete={handleBulkDelete}
+        isAdmin={isAdmin}
       />
 
       <h1 style={{ fontSize: "32px", fontWeight: 700, margin: "16px 0 32px", color: "var(--text-primary)" }}>
@@ -191,6 +209,7 @@ export default function IllustrationsLibrary() {
               onClick={handleCardClick}
               isSelected={selectedIds.has(illustration.id)}
               isSelectionMode={isSelectionMode}
+              commentCount={commentCounts[illustration.id] || 0}
             />
           ))
         ) : (
