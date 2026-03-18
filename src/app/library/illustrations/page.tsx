@@ -175,6 +175,7 @@ export default function IllustrationsLibrary() {
         illustration={selectedIllustration}
         onClose={() => setSelectedId(null)}
         onDelete={handleDeleteIllustration}
+        isAdmin={isAdmin}
       />
       <input type="file" accept="image/*" ref={upload.fileInputRef} onChange={upload.handleLightUpload} style={{ display: "none" }} />
       <input type="file" accept="image/*" ref={upload.darkFileInputRef} onChange={upload.handleDarkUpload} style={{ display: "none" }} />

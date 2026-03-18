@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
-import { getPendingRequests, approveRequest, rejectRequest } from "@/lib/admin";
+import { getPendingRequests, approveRequest, rejectRequest, addAdminDirectly } from "@/lib/admin";
 
 interface AdminRequest {
   id: number;
@@ -20,6 +20,9 @@ export default function AdminPage() {
   const [loadingReqs, setLoadingReqs] = useState(false);
   const [actionId, setActionId] = useState<number | null>(null);
   const [toast, setToast] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
   const loadRequests = useCallback(async () => {
     setLoadingReqs(true);
@@ -35,6 +38,20 @@ export default function AdminPage() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleAddAdmin = async () => {
+    if (!newEmail.trim()) return;
+    setIsAdding(true);
+    const { error } = await addAdminDirectly(newEmail.trim(), newName.trim() || newEmail.trim());
+    if (!error) {
+      showToast(`✅ ${newName || newEmail} added as admin`);
+      setNewEmail("");
+      setNewName("");
+    } else {
+      showToast("Error adding admin");
+    }
+    setIsAdding(false);
   };
 
   const handleApprove = async (req: AdminRequest) => {
@@ -107,6 +124,37 @@ export default function AdminPage() {
         <p style={{ color: "var(--text-secondary)", margin: 0 }}>
           Review and approve admin access requests.
         </p>
+      </div>
+
+      {/* Add Admin Directly */}
+      <div style={{ backgroundColor: "var(--card-bg)", borderRadius: "20px", border: "1px solid var(--border-color)", padding: "24px", marginBottom: "40px" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 16px" }}>
+          Add Admin by Email
+        </h2>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            style={{ flex: 1, minWidth: "160px", height: "44px", padding: "0 16px", borderRadius: "10px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "15px", outline: "none" }}
+          />
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddAdmin()}
+            style={{ flex: 2, minWidth: "200px", height: "44px", padding: "0 16px", borderRadius: "10px", border: "1px solid var(--border-color)", background: "var(--input-bg)", color: "var(--text-primary)", fontSize: "15px", outline: "none" }}
+          />
+          <button
+            onClick={handleAddAdmin}
+            disabled={isAdding || !newEmail.trim()}
+            style={{ height: "44px", padding: "0 24px", borderRadius: "10px", backgroundColor: "#7c3aed", color: "#ffffff", fontWeight: 600, border: "none", cursor: isAdding || !newEmail.trim() ? "not-allowed" : "pointer", opacity: isAdding || !newEmail.trim() ? 0.6 : 1, fontSize: "15px", whiteSpace: "nowrap" }}
+          >
+            {isAdding ? "Adding..." : "Add Admin"}
+          </button>
+        </div>
       </div>
 
       {loadingReqs ? (

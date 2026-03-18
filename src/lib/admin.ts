@@ -1,14 +1,25 @@
 import { supabase } from './supabase';
 
+const SUPER_ADMIN_EMAIL = 'shaina@equicomtech.com';
+
 export async function checkIsAdmin(email: string): Promise<boolean> {
   if (!email) return false;
+  const normalized = email.toLowerCase().trim();
+  if (normalized === SUPER_ADMIN_EMAIL) return true;
   const { data, error } = await supabase
     .from('admins')
     .select('id')
-    .eq('email', email.toLowerCase().trim())
+    .eq('email', normalized)
     .maybeSingle();
   if (error) return false;
   return !!data;
+}
+
+export async function addAdminDirectly(email: string, name: string) {
+  const { error } = await supabase
+    .from('admins')
+    .upsert([{ email: email.toLowerCase().trim(), name }], { onConflict: 'email' });
+  return { error };
 }
 
 export async function sendOTP(email: string) {
