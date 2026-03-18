@@ -6,9 +6,11 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 import SidebarMenuView from "./navbar/SidebarMenuView";
 import SidebarProfileView from "./navbar/SidebarProfileView";
 import SidebarMediaView from "./navbar/SidebarMediaView";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 export default function Navbar() {
   const router = useRouter();
+  const { isAdmin } = useAdminStatus();
   const [displayName, setDisplayName] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -181,6 +183,8 @@ export default function Navbar() {
             isDarkMode={isDarkMode}
             mounted={mounted}
             onToggleDarkMode={toggleDarkMode}
+            isAdmin={isAdmin}
+            onNavigateToAdmin={() => handleNavigation("/admin")}
           />
         ) : sidebarView === "profile" ? (
           <SidebarProfileView

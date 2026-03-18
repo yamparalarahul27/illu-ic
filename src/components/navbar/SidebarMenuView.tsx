@@ -7,9 +7,11 @@ interface SidebarMenuViewProps {
   isDarkMode: boolean;
   mounted: boolean;
   onToggleDarkMode: () => void;
+  isAdmin?: boolean;
+  onNavigateToAdmin?: () => void;
 }
 
-export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDarkMode, mounted, onToggleDarkMode }: SidebarMenuViewProps) {
+export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDarkMode, mounted, onToggleDarkMode, isAdmin, onNavigateToAdmin }: SidebarMenuViewProps) {
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
@@ -23,9 +25,19 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDar
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-        <div onClick={() => onNavigate("profile")} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Profile</div>
-        <div onClick={() => { onSyncData(); onNavigate("saved"); }} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Saved Media</div>
-        <div onClick={() => { onSyncData(); onNavigate("downloads"); }} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", cursor: "pointer", fontWeight: 500, color: "var(--text-primary)", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--input-hover)"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--input-bg)"}>Downloads</div>
+        <div onClick={() => onNavigate("profile")} style={menuItemStyle}>Profile</div>
+        
+        {isAdmin && onNavigateToAdmin && (
+          <div 
+            onClick={() => { onClose(); onNavigateToAdmin(); }} 
+            style={{ ...menuItemStyle, backgroundColor: "#ede9fe", color: "#7c3aed", fontWeight: 700 }}
+          >
+            <span style={{ marginRight: "8px" }}>🔑</span> Admin Dashboard
+          </div>
+        )}
+
+        <div onClick={() => { onSyncData(); onNavigate("saved"); }} style={menuItemStyle}>Saved Media</div>
+        <div onClick={() => { onSyncData(); onNavigate("downloads"); }} style={menuItemStyle}>Downloads</div>
 
         <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", color: "var(--text-primary)", fontWeight: 500 }}>
@@ -58,3 +70,15 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDar
     </>
   );
 }
+
+const menuItemStyle: React.CSSProperties = {
+  padding: "16px",
+  borderRadius: "12px",
+  backgroundColor: "var(--input-bg)",
+  cursor: "pointer",
+  fontWeight: 500,
+  color: "var(--text-primary)",
+  transition: "all 0.2s ease",
+  display: "flex",
+  alignItems: "center"
+};

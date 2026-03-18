@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { submitAdminRequest } from "@/lib/admin";
+import { sendOTP, verifyOTP } from "@/lib/admin";
 
-type Screen = "splash" | "auth" | "admin-request" | "admin-pending";
+type Screen = "splash" | "auth-choice" | "regular-form" | "admin-form" | "admin-otp";
 
 export default function SplashScreen() {
   const [logoVisible, setLogoVisible] = useState(false);
   const [screen, setScreen] = useState<Screen>("splash");
   const [isRendered, setIsRendered] = useState(true);
-  const [adminForm, setAdminForm] = useState({ name: "", email: "", team: "", reason: "" });
-  const [adminError, setAdminError] = useState("");
-  const [adminSubmitting, setAdminSubmitting] = useState(false);
+  const [authForm, setAuthForm] = useState({ name: "", email: "", team: "" });
+  const [otpCode, setOtpCode] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     // Check if user already identified
@@ -24,44 +25,53 @@ export default function SplashScreen() {
 
     // Logo fade in
     const logoIn = setTimeout(() => setLogoVisible(true), 100);
-    // After 2.5s, show auth buttons
-    const showAuth = setTimeout(() => setScreen("auth"), 2500);
+    // After 2.5s, show auth choice
+    const showAuth = setTimeout(() => setScreen("auth-choice"), 2500);
 
     return () => { clearTimeout(logoIn); clearTimeout(showAuth); };
   }, []);
 
-  const handleProceed = () => {
-    // User picks a name/email — reuse existing comment auth via localStorage prompt
-    // We'll show a simple inline form
-    setScreen("auth");
-  };
-
-  const handleProceedSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegularSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
-    const team = (form.elements.namedItem("team") as HTMLInputElement).value;
-    localStorage.setItem("graphicsLabCommentUser", JSON.stringify({ name, email, team }));
+    localStorage.setItem("graphicsLabCommentUser", JSON.stringify(authForm));
+    localStorage.setItem("graphicsLabUserName", authForm.name);
+    localStorage.setItem("graphicsLabUserEmail", authForm.email);
+    localStorage.setItem("graphicsLabUserTeam", authForm.team);
     setIsRendered(false);
   };
 
-  const handleAdminSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAdminRequestOTP = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setAdminSubmitting(true);
-    setAdminError("");
-    const { error } = await submitAdminRequest(adminForm);
-    if (error) {
-      setAdminError("Failed to send request. Please try again.");
-      setAdminSubmitting(false);
+    setSubmitting(true);
+    setError("");
+    const { error: otpError } = await sendOTP(authForm.email);
+    if (otpError) {
+      setError("Failed to send code. Please check your email.");
+      setSubmitting(false);
     } else {
-      // Save basic info so they can still browse
-      localStorage.setItem("graphicsLabCommentUser", JSON.stringify({
-        name: adminForm.name,
-        email: adminForm.email,
-        team: adminForm.team
-      }));
-      setScreen("admin-pending");
+      setScreen("admin-otp");
+      setSubmitting(false);
+    }
+  };
+
+  const handleAdminVerifyOTP = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (otpCode.length !== 4) {
+      setError("Please enter a 4-digit code.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    const { success, error: verifyError } = await verifyOTP(authForm.email, otpCode, authForm.name);
+    if (verifyError) {
+      setError(typeof verifyError === 'string' ? verifyError : "Verification failed.");
+      setSubmitting(false);
+    } else {
+      localStorage.setItem("graphicsLabCommentUser", JSON.stringify(authForm));
+      localStorage.setItem("graphicsLabUserName", authForm.name);
+      localStorage.setItem("graphicsLabUserEmail", authForm.email);
+      localStorage.setItem("graphicsLabUserTeam", authForm.team);
+      setIsRendered(false);
     }
   };
 
@@ -92,107 +102,91 @@ export default function SplashScreen() {
         />
       </div>
 
-      {/* Auth choice screen */}
-      {screen === "auth" && (
-        <div style={{
-          width: "100%", maxWidth: "420px", padding: "0 24px",
-          display: "flex", flexDirection: "column", gap: "24px",
-          animation: "fadeUp 0.4s ease"
-        }}>
-          <p style={{ textAlign: "center", color: "#6b7280", fontSize: "15px", margin: 0 }}>
-            Welcome to Graphics Lab. How would you like to continue?
+      {/* Auth choices */}
+      {screen === "auth-choice" && (
+        <div style={formWrapper}>
+          <p style={{ textAlign: "center", color: "#6b7280", fontSize: "15px", margin: "0 0 8px" }}>
+            Welcome to Graphics Lab.
           </p>
-
-          <form onSubmit={handleProceedSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <input name="name" placeholder="Full Name" required
-              style={inputStyle} />
-            <input name="email" type="email" placeholder="Email Address" required
-              style={inputStyle} />
-            <input name="team" placeholder="Team Name" required
-              style={inputStyle} />
-            <button type="submit" style={primaryBtn}>
-              Proceed
-            </button>
-          </form>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button onClick={() => setScreen("regular-form")} style={primaryBtn}>
+            Proceed
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "8px 0" }}>
             <div style={{ flex: 1, height: "1px", backgroundColor: "#e5e7eb" }} />
             <span style={{ color: "#9ca3af", fontSize: "13px" }}>or</span>
             <div style={{ flex: 1, height: "1px", backgroundColor: "#e5e7eb" }} />
           </div>
-
-          <button onClick={() => setScreen("admin-request")} style={secondaryBtn}>
+          <button onClick={() => setScreen("admin-form")} style={secondaryBtn}>
             🔑 Join as Admin
           </button>
         </div>
       )}
 
-      {/* Admin request form */}
-      {screen === "admin-request" && (
-        <div style={{
-          width: "100%", maxWidth: "420px", padding: "0 24px",
-          display: "flex", flexDirection: "column", gap: "20px",
-          animation: "fadeUp 0.4s ease"
-        }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#111827", textAlign: "center" }}>
-              Request Admin Access
-            </h2>
-            <p style={{ margin: "8px 0 0", textAlign: "center", color: "#6b7280", fontSize: "13px" }}>
-              Your request will be reviewed by the web admin.
-            </p>
-          </div>
-          <form onSubmit={handleAdminSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <input placeholder="Full Name" required value={adminForm.name}
-              onChange={e => setAdminForm(f => ({ ...f, name: e.target.value }))}
+      {/* Regular user form */}
+      {screen === "regular-form" && (
+        <div style={formWrapper}>
+          <h2 style={formTitle}>Quick Identification</h2>
+          <form onSubmit={handleRegularSubmit} style={formStyle}>
+            <input placeholder="Full Name" required value={authForm.name}
+              onChange={e => setAuthForm(f => ({ ...f, name: e.target.value }))}
               style={inputStyle} />
-            <input type="email" placeholder="Email Address" required value={adminForm.email}
-              onChange={e => setAdminForm(f => ({ ...f, email: e.target.value }))}
+            <input type="email" placeholder="Email Address" required value={authForm.email}
+              onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))}
               style={inputStyle} />
-            <input placeholder="Team Name" required value={adminForm.team}
-              onChange={e => setAdminForm(f => ({ ...f, team: e.target.value }))}
+            <input placeholder="Team Name" required value={authForm.team}
+              onChange={e => setAuthForm(f => ({ ...f, team: e.target.value }))}
               style={inputStyle} />
-            <textarea placeholder="Why do you need admin access?" required value={adminForm.reason}
-              onChange={e => setAdminForm(f => ({ ...f, reason: e.target.value }))}
-              rows={3}
-              style={{ ...inputStyle, height: "auto", padding: "12px 16px", resize: "none" }} />
-            {adminError && (
-              <p style={{ color: "#ef4444", fontSize: "13px", margin: 0 }}>{adminError}</p>
-            )}
-            <button type="submit" disabled={adminSubmitting} style={primaryBtn}>
-              {adminSubmitting ? "Sending..." : "Send Request"}
-            </button>
-            <button type="button" onClick={() => setScreen("auth")}
-              style={{ ...secondaryBtn, marginTop: 0 }}>
-              ← Back
-            </button>
+            <button type="submit" style={primaryBtn}>Start Browsing</button>
+            <button type="button" onClick={() => setScreen("auth-choice")} style={backBtn}>← Back</button>
           </form>
         </div>
       )}
 
-      {/* Pending approval screen */}
-      {screen === "admin-pending" && (
-        <div style={{
-          textAlign: "center", maxWidth: "360px", padding: "0 24px",
-          display: "flex", flexDirection: "column", gap: "16px", alignItems: "center",
-          animation: "fadeUp 0.4s ease"
-        }}>
-          <div style={{
-            width: "64px", height: "64px", borderRadius: "50%",
-            backgroundColor: "#ede9fe", display: "flex", alignItems: "center",
-            justifyContent: "center", fontSize: "28px"
-          }}>
-            ⏳
-          </div>
-          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#111827" }}>
-            Request Sent!
-          </h2>
-          <p style={{ margin: 0, color: "#6b7280", fontSize: "14px", lineHeight: "1.6" }}>
-            Your admin access request has been submitted. You&apos;ll be notified once it&apos;s approved. In the meantime, you can browse as a regular user.
-          </p>
-          <button onClick={() => setIsRendered(false)} style={primaryBtn}>
-            Browse Library
-          </button>
+      {/* Admin request form (Step 1) */}
+      {screen === "admin-form" && (
+        <div style={formWrapper}>
+          <h2 style={formTitle}>Admin Registration</h2>
+          <p style={subtitle}>Access code will be sent to your email.</p>
+          <form onSubmit={handleAdminRequestOTP} style={formStyle}>
+            <input placeholder="Full Name" required value={authForm.name}
+              onChange={e => setAuthForm(f => ({ ...f, name: e.target.value }))}
+              style={inputStyle} />
+            <input type="email" placeholder="Email Address" required value={authForm.email}
+              onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))}
+              style={inputStyle} />
+            <input placeholder="Team Name" required value={authForm.team}
+              onChange={e => setAuthForm(f => ({ ...f, team: e.target.value }))}
+              style={inputStyle} />
+            {error && <p style={errorText}>{error}</p>}
+            <button type="submit" disabled={submitting} style={primaryBtn}>
+              {submitting ? "Sending..." : "Send Verification Code"}
+            </button>
+            <button type="button" onClick={() => setScreen("auth-choice")} style={backBtn}>← Back</button>
+          </form>
+        </div>
+      )}
+
+      {/* Admin OTP Verification (Step 2) */}
+      {screen === "admin-otp" && (
+        <div style={formWrapper}>
+          <h2 style={formTitle}>Verify Your Email</h2>
+          <p style={subtitle}>Enter the 4-digit code sent to <b>{authForm.email}</b></p>
+          <form onSubmit={handleAdminVerifyOTP} style={formStyle}>
+            <input
+              type="text"
+              maxLength={4}
+              placeholder="0000"
+              required
+              value={otpCode}
+              onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+              style={{ ...inputStyle, textAlign: "center", fontSize: "24px", letterSpacing: "8px" }}
+            />
+            {error && <p style={errorText}>{error}</p>}
+            <button type="submit" disabled={submitting} style={primaryBtn}>
+              {submitting ? "Verifying..." : "Verify & Join"}
+            </button>
+            <button type="button" onClick={() => setScreen("admin-form")} style={backBtn}>← Back</button>
+          </form>
         </div>
       )}
 
@@ -206,22 +200,39 @@ export default function SplashScreen() {
   );
 }
 
+const formWrapper: React.CSSProperties = {
+  width: "100%", maxWidth: "420px", padding: "0 24px",
+  display: "flex", flexDirection: "column", gap: "20px",
+  animation: "fadeUp 0.4s ease"
+};
+
+const formTitle: React.CSSProperties = { margin: 0, fontSize: "22px", fontWeight: 700, color: "#111827", textAlign: "center" };
+const subtitle: React.CSSProperties = { margin: "-12px 0 0", textAlign: "center", color: "#6b7280", fontSize: "13px" };
+const formStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: "12px" };
 const inputStyle: React.CSSProperties = {
-  height: "48px", padding: "0 16px", borderRadius: "12px",
-  border: "1px solid #e5e7eb", background: "#f9fafb",
-  color: "#111827", fontSize: "15px", outline: "none",
-  width: "100%", boxSizing: "border-box"
+  height: "52px", padding: "0 16px", borderRadius: "14px",
+  border: "1.5px solid #e5e7eb", background: "#f9fafb",
+  color: "#111827", fontSize: "16px", outline: "none",
+  width: "100%", boxSizing: "border-box", transition: "border-color 0.2s ease"
 };
 
 const primaryBtn: React.CSSProperties = {
-  height: "48px", background: "#7c3aed", color: "#ffffff",
-  border: "none", borderRadius: "12px", fontWeight: 700,
-  cursor: "pointer", fontSize: "15px", width: "100%",
-  transition: "opacity 0.2s ease"
+  height: "52px", background: "#7c3aed", color: "#ffffff",
+  border: "none", borderRadius: "14px", fontWeight: 700,
+  cursor: "pointer", fontSize: "16px", width: "100%",
+  boxShadow: "0 4px 12px rgba(124, 58, 237, 0.25)",
+  transition: "all 0.2s ease"
 };
 
 const secondaryBtn: React.CSSProperties = {
-  height: "48px", background: "transparent", color: "#7c3aed",
-  border: "1.5px solid #7c3aed", borderRadius: "12px", fontWeight: 600,
-  cursor: "pointer", fontSize: "15px", width: "100%"
+  height: "52px", background: "#f3f4f6", color: "#374151",
+  border: "none", borderRadius: "14px", fontWeight: 600,
+  cursor: "pointer", fontSize: "16px", width: "100%",
 };
+
+const backBtn: React.CSSProperties = {
+  background: "none", border: "none", color: "#6b7280",
+  fontSize: "14px", cursor: "pointer", fontWeight: 500, marginTop: "4px"
+};
+
+const errorText: React.CSSProperties = { color: "#ef4444", fontSize: "13px", margin: "0", textAlign: "center" };
