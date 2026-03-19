@@ -25,6 +25,7 @@ export default function LoadingOverlay() {
   const [queue, setQueue] = useState<string[]>(() => [...SONGS].sort(() => Math.random() - 0.5));
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [albumArt, setAlbumArt] = useState<string | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,26 +45,68 @@ export default function LoadingOverlay() {
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch album art from iTunes when song changes
+  useEffect(() => {
+    const song = queue[index];
+    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(song)}&media=music&limit=1`)
+      .then(r => r.json())
+      .then(data => {
+        const raw = data.results?.[0]?.artworkUrl100;
+        if (raw) {
+          setAlbumArt(raw.replace("100x100bb", "500x500bb"));
+        } else {
+          setAlbumArt(null);
+        }
+      })
+      .catch(() => setAlbumArt(null));
+  }, [index]);
+
   return (
     <div style={{
       position: "fixed",
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      backdropFilter: "blur(12px)",
+      backgroundColor: "rgba(0,0,0,0.65)",
+      backdropFilter: "blur(16px)",
       zIndex: 9999,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: "32px",
+      gap: "28px",
     }}>
-      <div className="spinner-container">
-        <svg viewBox="0 0 50 50" className="spinner">
-          <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="5" />
-        </svg>
-        <div className="bg-circle" />
+
+      {/* Vinyl */}
+      <div className="vinyl" style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "scale(1)" : "scale(0.96)",
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+      }}>
+        {/* Outer vinyl disc */}
+        <div className="vinyl-disc">
+          {/* Groove rings */}
+          <div className="vinyl-grooves" />
+
+          {/* Album art label */}
+          <div className="vinyl-label" style={{
+            backgroundImage: albumArt ? `url(${albumArt})` : "none",
+            backgroundColor: albumArt ? "transparent" : "#2d1b69",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}>
+            {!albumArt && (
+              <div style={{ fontSize: "22px" }}>♪</div>
+            )}
+          </div>
+
+          {/* Center hole */}
+          <div className="vinyl-hole" />
+
+          {/* Sheen overlay */}
+          <div className="vinyl-sheen" />
+        </div>
       </div>
 
+      {/* Song info */}
       <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
         <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.45)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
           ♪ now playing
@@ -85,38 +128,75 @@ export default function LoadingOverlay() {
       </div>
 
       <style jsx>{`
-        .spinner-container {
+        .vinyl {
+          width: 200px;
+          height: 200px;
           position: relative;
-          width: 64px;
-          height: 64px;
         }
-        .spinner {
-          animation: rotate 2s linear infinite;
-          width: 100%;
-          height: 100%;
-          position: relative;
-          z-index: 2;
-        }
-        .spinner .path {
-          stroke: #7c3aed;
-          stroke-linecap: round;
-          animation: dash 1.5s ease-in-out infinite;
-        }
-        .bg-circle {
-          position: absolute;
-          top: 0; left: 0;
-          width: 100%; height: 100%;
+        .vinyl-disc {
+          width: 200px;
+          height: 200px;
           border-radius: 50%;
-          border: 5px solid rgba(167,139,250,0.2);
-          z-index: 1;
+          background: #111;
+          position: relative;
+          animation: spin 4s linear infinite;
+          box-shadow: 0 0 0 2px #222, 0 16px 48px rgba(0,0,0,0.6);
+          overflow: hidden;
         }
-        @keyframes rotate {
-          100% { transform: rotate(360deg); }
+        .vinyl-grooves {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: repeating-radial-gradient(
+            circle at center,
+            transparent 0px,
+            transparent 3px,
+            rgba(255,255,255,0.03) 3px,
+            rgba(255,255,255,0.03) 4px
+          );
         }
-        @keyframes dash {
-          0%   { stroke-dasharray: 1, 150; stroke-dashoffset: 0; stroke: #ddd6fe; }
-          50%  { stroke-dasharray: 90, 150; stroke-dashoffset: -35; stroke: #a78bfa; }
-          100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; stroke: #7c3aed; }
+        .vinyl-label {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,0.5);
+          box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+          overflow: hidden;
+        }
+        .vinyl-hole {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.8);
+          z-index: 10;
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+        }
+        .vinyl-sheen {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: linear-gradient(
+            135deg,
+            rgba(255,255,255,0.07) 0%,
+            transparent 50%,
+            rgba(255,255,255,0.03) 100%
+          );
+          pointer-events: none;
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
       `}</style>
     </div>
