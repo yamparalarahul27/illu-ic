@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import SidebarMenuView from "./navbar/SidebarMenuView";
 import SidebarProfileView from "./navbar/SidebarProfileView";
@@ -144,9 +145,18 @@ export default function Navbar() {
       {isLoading && <LoadingOverlay />}
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000, padding: "0 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span className="logo" onClick={() => handleNavigation("/dashboard")} style={{ cursor: "pointer" }}>
-            GRAPHICS LAB
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }} onClick={() => handleNavigation("/dashboard")}>
+            <Image
+              src={isDarkMode ? "/ill_logo_dark@3x.png" : "/ill_logo_light@3x.png"}
+              alt="Graphics Lab logo"
+              width={44}
+              height={44}
+              style={{ objectFit: "contain" }}
+            />
+            <span className="logo" style={{ cursor: "pointer" }}>
+              GRAPHICS LAB
+            </span>
+          </div>
           {/* Role badge for admins */}
           {isAdminMode && roleCfg && (
             <span style={{
