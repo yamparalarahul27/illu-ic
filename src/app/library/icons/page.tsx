@@ -8,7 +8,7 @@ import { Icon } from "@/types/icon";
 import { Illustration } from "@/types/illustration";
 import { useIconUploadFlow } from "./hooks/useIconUploadFlow";
 import { useIconEditFlow } from "./hooks/useIconEditFlow";
-import UploadModal from "@/app/library/illustrations/components/UploadModal";
+import IconUploadModal from "./components/IconUploadModal";
 import EditAssetModal from "@/app/library/illustrations/components/EditAssetModal";
 import IconCard from "./components/IconCard";
 import SearchControlBar, { CardSize } from "@/app/library/illustrations/components/SearchControlBar";
@@ -200,13 +200,15 @@ export default function IconsLibrary() {
       {(isLoading || upload.isUploading) && <LoadingOverlay />}
 
       {upload.showUploadModal && (
-        <UploadModal
+        <IconUploadModal
           uploadStep={upload.uploadStep}
           setUploadStep={upload.setUploadStep}
           fileInputRef={upload.fileInputRef}
           darkFileInputRef={upload.darkFileInputRef}
           onClose={upload.closeModal}
           onFinalize={upload.finalizeUpload}
+          onChooseVariants={upload.chooseVariants}
+          onChooseNeutral={upload.chooseNeutral}
           canAssignTag={can.assignNameTag(role)}
           nameTag={upload.nameTag}
           onNameTagChange={upload.setNameTag}
@@ -238,7 +240,7 @@ export default function IconsLibrary() {
         onApply={handleApplyFilter}
       />
 
-      <input type="file" accept="image/*" ref={upload.fileInputRef} onChange={upload.handleLightUpload} style={{ display: "none" }} />
+      <input type="file" accept="image/*" ref={upload.fileInputRef} onChange={upload.isNeutral ? upload.handleSingleUpload : upload.handleLightUpload} style={{ display: "none" }} />
       <input type="file" accept="image/*" ref={upload.darkFileInputRef} onChange={upload.handleDarkUpload} style={{ display: "none" }} />
       <input type="file" accept="image/*" ref={edit.fileInputRef} onChange={edit.handleLightUpload} style={{ display: "none" }} />
       <input type="file" accept="image/*" ref={edit.darkFileInputRef} onChange={edit.handleDarkUpload} style={{ display: "none" }} />
