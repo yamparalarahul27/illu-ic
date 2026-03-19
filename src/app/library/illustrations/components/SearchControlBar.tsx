@@ -74,12 +74,13 @@ interface SearchControlBarProps {
   role: UserRole;
   cardSize: CardSize;
   onCardSizeChange: (size: CardSize) => void;
+  searchPlaceholder?: string;
 }
 
 export default function SearchControlBar({
   searchQuery, onSearchChange, onFilterClick, isFilterActive,
   onUploadClick, isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete, role,
-  cardSize, onCardSizeChange,
+  cardSize, onCardSizeChange, searchPlaceholder = "Search illustrations...",
 }: SearchControlBarProps) {
   const canUpload = can.upload(role);
   const canDelete = can.delete(role);
@@ -103,7 +104,7 @@ export default function SearchControlBar({
         </div>
         <input
           type="text"
-          placeholder="Search illustrations..."
+          placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           style={{ width: "100%", height: "100%", padding: "0 16px 0 48px", borderRadius: "24px", border: "1px solid var(--border-color)", backgroundColor: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px", outline: "none" }}

@@ -23,7 +23,7 @@ function DashboardContent() {
 
   return (
     <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}>
-      {isLoading && <LoadingOverlay message="Opening Library..." />}
+      {isLoading && <LoadingOverlay />}
 
       <WelcomeBanner greetingPrefix={greetingPrefix} />
 
@@ -38,6 +38,7 @@ function DashboardContent() {
           title="Icons"
           backgroundImage="/ill_icons_card_design.png"
           imageStyle={{ objectFit: "contain", objectPosition: "center", zIndex: 0, padding: "20px", transform: "scale(1.15)" }}
+          onClick={() => handleNavigation("/library/icons")}
         />
         <DashboardCard title="Branding" backgroundGradient="radial-gradient(circle at center, #7c3aed 10%, transparent 80%)" />
         <DashboardCard title="Brand Guidelines" backgroundGradient="radial-gradient(circle at center, #ec4899 10%, transparent 80%)" />

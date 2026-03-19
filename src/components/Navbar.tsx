@@ -128,7 +128,7 @@ export default function Navbar() {
 
   return (
     <>
-      {isLoading && <LoadingOverlay message="Navigating..." />}
+      {isLoading && <LoadingOverlay />}
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 2000, padding: "0 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <span className="logo" onClick={() => handleNavigation("/dashboard")} style={{ cursor: "pointer" }}>

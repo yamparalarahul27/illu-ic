@@ -112,3 +112,20 @@ export async function updateIllustrationNameTag(id: number, name_tag: string) {
     .eq('id', id);
   return { error };
 }
+
+// ── Icon status / name tag ──────────────────────────────────────────────────────
+export async function updateIconStatus(id: number, status: string) {
+  const { error } = await supabase
+    .from('icons')
+    .update({ status })
+    .eq('id', id);
+  return { error };
+}
+
+export async function updateIconNameTag(id: number, name_tag: string) {
+  const { error } = await supabase
+    .from('icons')
+    .update({ name_tag })
+    .eq('id', id);
+  return { error };
+}

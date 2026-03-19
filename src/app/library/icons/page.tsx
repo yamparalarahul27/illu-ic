@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import IllustrationSidePanel from "@/components/IllustrationSidePanel";
+import IconSidePanel from "./components/IconSidePanel";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { supabase } from "@/lib/supabase";
+import { Icon } from "@/types/icon";
 import { Illustration } from "@/types/illustration";
-import { useUploadFlow } from "./hooks/useUploadFlow";
-import { useEditFlow } from "./hooks/useEditFlow";
-import UploadModal from "./components/UploadModal";
-import EditAssetModal from "./components/EditAssetModal";
-import IllustrationCard from "./components/IllustrationCard";
-import SearchControlBar, { CardSize } from "./components/SearchControlBar";
-import FilterSidebar, { SortBy, ViewFilters } from "./components/FilterSidebar";
+import { useIconUploadFlow } from "./hooks/useIconUploadFlow";
+import { useIconEditFlow } from "./hooks/useIconEditFlow";
+import UploadModal from "@/app/library/illustrations/components/UploadModal";
+import EditAssetModal from "@/app/library/illustrations/components/EditAssetModal";
+import IconCard from "./components/IconCard";
+import SearchControlBar, { CardSize } from "@/app/library/illustrations/components/SearchControlBar";
+import FilterSidebar, { SortBy, ViewFilters } from "@/app/library/illustrations/components/FilterSidebar";
 import { useSession } from "@/hooks/useSession";
 import { can, NAME_TAGS } from "@/lib/permissions";
 
@@ -19,11 +20,11 @@ const DEFAULT_VIEW_FILTERS: ViewFilters = {
   confirmed: false, inProgress: false, underReview: false,
 };
 
-export default function IllustrationsLibrary() {
+export default function IconsLibrary() {
   const session = useSession();
   const role = session.role;
   const [searchQuery, setSearchQuery] = useState("");
-  const [illustrations, setIllustrations] = useState<Illustration[]>([]);
+  const [icons, setIcons] = useState<Icon[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +32,6 @@ export default function IllustrationsLibrary() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
 
-  // Light / Dark view — synced with global Navbar theme toggle
   const [isDarkView, setIsDarkView] = useState(false);
 
   useEffect(() => {
@@ -41,67 +41,62 @@ export default function IllustrationsLibrary() {
     return () => window.removeEventListener("graphicsLabThemeChange", handler);
   }, []);
 
-  // Card size
   const [cardSize, setCardSize] = useState<CardSize>("normal");
-
-  // Filter sidebar
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("newest");
   const [viewFilters, setViewFilters] = useState<ViewFilters>(DEFAULT_VIEW_FILTERS);
 
   const isFilterActive = sortBy !== "newest" || Object.values(viewFilters).some(Boolean);
 
-  // Custom tags persisted in localStorage so new labels are never forgotten
   const [customTags, setCustomTags] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
-    try { return JSON.parse(localStorage.getItem("graphicsLabCustomTags") || "[]"); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem("graphicsLabCustomIconTags") || "[]"); } catch { return []; }
   });
 
   const handleNewTag = (tag: string) => {
     setCustomTags(prev => {
       if (prev.includes(tag)) return prev;
       const next = [...prev, tag];
-      localStorage.setItem("graphicsLabCustomTags", JSON.stringify(next));
+      localStorage.setItem("graphicsLabCustomIconTags", JSON.stringify(next));
       return next;
     });
   };
 
-  // Merge predefined + persisted custom + any tags already on illustrations
-  const availableTags = [...new Set([...NAME_TAGS, ...customTags, ...illustrations.map(i => i.name_tag).filter((t): t is string => !!t)])];
+  const availableTags = [...new Set([...NAME_TAGS, ...customTags, ...icons.map(i => i.name_tag).filter((t): t is string => !!t)])];
 
-  const upload = useUploadFlow((newIllustration) => {
-    setIllustrations([newIllustration, ...illustrations]);
-    setSelectedId(newIllustration.id);
+  const upload = useIconUploadFlow((newIcon) => {
+    setIcons([newIcon, ...icons]);
+    setSelectedId(newIcon.id);
   });
 
-  const edit = useEditFlow((id, fields) => {
-    setIllustrations(prev => prev.map(ill => ill.id === id ? { ...ill, ...fields } : ill));
+  const edit = useIconEditFlow((id, fields) => {
+    setIcons(prev => prev.map(ic => ic.id === id ? { ...ic, ...fields } : ic));
   });
 
   useEffect(() => {
     setIsMounted(true);
-    fetchIllustrations();
+    fetchIcons();
     fetchCommentCounts();
   }, []);
 
-  const fetchIllustrations = async () => {
+  const fetchIcons = async () => {
     const { data, error } = await supabase
-      .from('illustrations')
+      .from('icons')
       .select('*')
       .order('created_at', { ascending: false });
     if (error) {
-      console.error("Error fetching illustrations:", error);
+      console.error("Error fetching icons:", error);
     } else if (data) {
-      setIllustrations(data);
+      setIcons(data);
     }
   };
 
   const fetchCommentCounts = async () => {
-    const { data, error } = await supabase.from('comments').select('illustration_id');
+    const { data, error } = await supabase.from('icon_comments').select('icon_id');
     if (!error && data) {
       const counts: Record<number, number> = {};
-      (data as { illustration_id: number }[]).forEach((row) => {
-        counts[row.illustration_id] = (counts[row.illustration_id] || 0) + 1;
+      (data as { icon_id: number }[]).forEach((row) => {
+        counts[row.icon_id] = (counts[row.icon_id] || 0) + 1;
       });
       setCommentCounts(counts);
     }
@@ -109,18 +104,18 @@ export default function IllustrationsLibrary() {
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem("graphicsLabIllustrations", JSON.stringify(illustrations));
+      localStorage.setItem("graphicsLabIcons", JSON.stringify(icons));
       window.dispatchEvent(new Event("storage"));
     }
-  }, [illustrations, isMounted]);
+  }, [icons, isMounted]);
 
   const handleApplyFilter = (newSortBy: SortBy, newViewFilters: ViewFilters) => {
     setSortBy(newSortBy);
     setViewFilters(newViewFilters);
   };
 
-  const filteredIllustrations = (() => {
-    let result = illustrations.filter((item) => {
+  const filteredIcons = (() => {
+    let result = icons.filter((item) => {
       const name = item.name.toLowerCase();
       const nameTag = (item.name_tag || "").toLowerCase();
       const query = searchQuery.toLowerCase();
@@ -136,7 +131,6 @@ export default function IllustrationsLibrary() {
       return false;
     });
 
-    // Sort
     if (sortBy === "newest") {
       result = [...result].sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime());
     } else if (sortBy === "oldest") {
@@ -150,7 +144,7 @@ export default function IllustrationsLibrary() {
     return result;
   })();
 
-  const selectedIllustration = illustrations.find(i => i.id === selectedId) || null;
+  const selectedIcon = icons.find(i => i.id === selectedId) || null;
 
   const handleCardClick = (id: number) => {
     if (isSelectionMode) {
@@ -172,10 +166,10 @@ export default function IllustrationsLibrary() {
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     const count = selectedIds.size;
-    if (!confirm(`Delete ${count} illustration${count > 1 ? 's' : ''}? This cannot be undone.`)) return;
+    if (!confirm(`Delete ${count} icon${count > 1 ? 's' : ''}? This cannot be undone.`)) return;
 
     const ids = Array.from(selectedIds);
-    const { error } = await supabase.from('illustrations').delete().in('id', ids);
+    const { error } = await supabase.from('icons').delete().in('id', ids);
     if (error) { alert(`Error deleting: ${error.message}`); return; }
 
     const storedBookmarks = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
@@ -183,17 +177,17 @@ export default function IllustrationsLibrary() {
     const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
     localStorage.setItem("graphicsLabDownloaded", JSON.stringify(storedDownloads.filter((d: any) => !ids.includes(d.id))));
 
-    setIllustrations(prev => prev.filter(ill => !ids.includes(ill.id)));
+    setIcons(prev => prev.filter(ic => !ids.includes(ic.id)));
     setSelectedIds(new Set());
     setIsSelectionMode(false);
     window.dispatchEvent(new Event("storage"));
   };
 
-  const handleDeleteIllustration = async (id: number) => {
-    const { error } = await supabase.from('illustrations').delete().eq('id', id);
+  const handleDeleteIcon = async (id: number) => {
+    const { error } = await supabase.from('icons').delete().eq('id', id);
     if (error) { alert(`Error deleting: ${error.message}`); return; }
 
-    setIllustrations(illustrations.filter(ill => ill.id !== id));
+    setIcons(icons.filter(ic => ic.id !== id));
     const storedBookmarks = JSON.parse(localStorage.getItem("graphicsLabBookmarks") || "[]");
     localStorage.setItem("graphicsLabBookmarks", JSON.stringify(storedBookmarks.filter((bid: number) => bid !== id)));
     const storedDownloads = JSON.parse(localStorage.getItem("graphicsLabDownloaded") || "[]");
@@ -221,18 +215,20 @@ export default function IllustrationsLibrary() {
         />
       )}
 
-      <IllustrationSidePanel
-        illustration={selectedIllustration}
-        onClose={() => setSelectedId(null)}
-        onDelete={handleDeleteIllustration}
-        role={role}
-        isDarkView={isDarkView}
-        availableTags={availableTags}
-        onNewTag={handleNewTag}
-        onIllustrationUpdate={(id, fields) => {
-          setIllustrations(prev => prev.map(ill => ill.id === id ? { ...ill, ...fields } : ill));
-        }}
-      />
+      {selectedIcon && (
+        <IconSidePanel
+          icon={selectedIcon}
+          onClose={() => setSelectedId(null)}
+          onDelete={handleDeleteIcon}
+          role={role}
+          isDarkView={isDarkView}
+          availableTags={availableTags}
+          onNewTag={handleNewTag}
+          onIconUpdate={(id, fields) => {
+            setIcons(prev => prev.map(ic => ic.id === id ? { ...ic, ...fields } : ic));
+          }}
+        />
+      )}
 
       <FilterSidebar
         isOpen={filterSidebarOpen}
@@ -247,9 +243,9 @@ export default function IllustrationsLibrary() {
       <input type="file" accept="image/*" ref={edit.fileInputRef} onChange={edit.handleLightUpload} style={{ display: "none" }} />
       <input type="file" accept="image/*" ref={edit.darkFileInputRef} onChange={edit.handleDarkUpload} style={{ display: "none" }} />
 
-      {edit.showEditModal && edit.editingIllustration && (
+      {edit.showEditModal && edit.editingIcon && (
         <EditAssetModal
-          illustration={edit.editingIllustration}
+          illustration={edit.editingIcon as unknown as Illustration}
           uploadStep={edit.uploadStep}
           setUploadStep={edit.setUploadStep}
           fileInputRef={edit.fileInputRef}
@@ -275,37 +271,38 @@ export default function IllustrationsLibrary() {
         role={role}
         cardSize={cardSize}
         onCardSizeChange={setCardSize}
+        searchPlaceholder="Search icons..."
       />
 
       <h1 style={{ fontSize: "32px", fontWeight: 700, margin: "16px 0 32px", color: "var(--text-primary)" }}>
-        Illustrations Library
+        Icons Library
       </h1>
 
       {(() => {
         const sections = availableTags
-          .map(tag => ({ tag, items: filteredIllustrations.filter(i => i.name_tag === tag) }))
+          .map(tag => ({ tag, items: filteredIcons.filter(i => i.name_tag === tag) }))
           .filter(s => s.items.length > 0);
-        const untagged = filteredIllustrations.filter(i => !i.name_tag);
+        const untagged = filteredIcons.filter(i => !i.name_tag);
         const hasAny = sections.length > 0 || untagged.length > 0;
 
         if (!hasAny) return (
           <div style={{ textAlign: "center", padding: "64px 0", color: "var(--text-secondary)" }}>
-            <p style={{ fontSize: "18px", fontWeight: 500 }}>No illustrations found.</p>
-            <p style={{ marginTop: "8px" }}>Try adjusting your filters or search query.</p>
+            <p style={{ fontSize: "18px", fontWeight: 500 }}>No icons yet.</p>
+            <p style={{ marginTop: "8px" }}>Upload your first icon to get started.</p>
           </div>
         );
 
         const colWidth = cardSize === "small" ? "160px" : cardSize === "large" ? "340px" : "240px";
-        const renderGrid = (items: typeof filteredIllustrations) => (
+        const renderGrid = (items: typeof filteredIcons) => (
           <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(${colWidth}, 1fr))`, gap: "24px" }}>
-            {items.map(illustration => (
-              <IllustrationCard
-                key={illustration.id}
-                illustration={illustration}
+            {items.map(icon => (
+              <IconCard
+                key={icon.id}
+                icon={icon}
                 onClick={handleCardClick}
-                isSelected={selectedIds.has(illustration.id)}
+                isSelected={selectedIds.has(icon.id)}
                 isSelectionMode={isSelectionMode}
-                commentCount={commentCounts[illustration.id] || 0}
+                commentCount={commentCounts[icon.id] || 0}
                 isDarkView={isDarkView}
                 onEditClick={can.upload(role) ? edit.openEditModal : undefined}
               />
