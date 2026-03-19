@@ -26,6 +26,7 @@ export default function LoadingOverlay() {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const [albumArt, setAlbumArt] = useState<string | null>(null);
+  const [artistName, setArtistName] = useState<string | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,158 +46,154 @@ export default function LoadingOverlay() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch album art from iTunes when song changes
   useEffect(() => {
     const song = queue[index];
     fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(song)}&media=music&limit=1`)
       .then(r => r.json())
       .then(data => {
-        const raw = data.results?.[0]?.artworkUrl100;
-        if (raw) {
-          setAlbumArt(raw.replace("100x100bb", "500x500bb"));
+        const result = data.results?.[0];
+        if (result) {
+          setAlbumArt(result.artworkUrl100.replace("100x100bb", "500x500bb"));
+          setArtistName(result.artistName ?? null);
         } else {
           setAlbumArt(null);
+          setArtistName(null);
         }
       })
-      .catch(() => setAlbumArt(null));
+      .catch(() => { setAlbumArt(null); setArtistName(null); });
   }, [index]);
 
   return (
     <div style={{
       position: "fixed",
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: "rgba(0,0,0,0.65)",
-      backdropFilter: "blur(16px)",
+      backgroundColor: "rgba(0,0,0,0.75)",
+      backdropFilter: "blur(20px)",
       zIndex: 9999,
       display: "flex",
-      flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: "28px",
     }}>
-
-      {/* Vinyl */}
-      <div className="vinyl" style={{
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "20px",
         opacity: visible ? 1 : 0,
-        transform: visible ? "scale(1)" : "scale(0.96)",
+        transform: visible ? "translateY(0)" : "translateY(8px)",
         transition: "opacity 0.3s ease, transform 0.3s ease",
       }}>
-        {/* Outer vinyl disc */}
-        <div className="vinyl-disc">
-          {/* Groove rings */}
-          <div className="vinyl-grooves" />
 
-          {/* Album art label */}
-          <div className="vinyl-label" style={{
-            backgroundImage: albumArt ? `url(${albumArt})` : "none",
-            backgroundColor: albumArt ? "transparent" : "#2d1b69",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}>
-            {!albumArt && (
-              <div style={{ fontSize: "22px" }}>♪</div>
-            )}
+        {/* Album art */}
+        <div style={{
+          width: "200px",
+          height: "200px",
+          borderRadius: "12px",
+          overflow: "hidden",
+          backgroundColor: "#1a1a2e",
+          boxShadow: albumArt
+            ? "0 32px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4)"
+            : "0 16px 40px rgba(0,0,0,0.4)",
+          flexShrink: 0,
+          position: "relative",
+        }}>
+          {albumArt ? (
+            <img
+              src={albumArt}
+              alt="album art"
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+              </svg>
+            </div>
+          )}
+        </div>
+
+        {/* Song info */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", width: "200px" }}>
+
+          {/* NOW PLAYING + equalizer bars */}
+          <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+            <span style={{ fontSize: "10px", fontWeight: 700, color: "#1db954", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              Now Playing
+            </span>
+            <div className="eq-bars">
+              <span className="eq-bar" style={{ animationDelay: "0s" }} />
+              <span className="eq-bar" style={{ animationDelay: "0.2s" }} />
+              <span className="eq-bar" style={{ animationDelay: "0.4s" }} />
+            </div>
           </div>
 
-          {/* Center hole */}
-          <div className="vinyl-hole" />
+          {/* Song title */}
+          <p style={{
+            margin: 0,
+            fontSize: "16px",
+            fontWeight: 700,
+            color: "#ffffff",
+            letterSpacing: "-0.3px",
+            textAlign: "center",
+            lineHeight: 1.3,
+          }}>
+            {queue[index]}
+          </p>
 
-          {/* Sheen overlay */}
-          <div className="vinyl-sheen" />
+          {/* Artist */}
+          {artistName && (
+            <p style={{
+              margin: 0,
+              fontSize: "13px",
+              fontWeight: 400,
+              color: "rgba(255,255,255,0.5)",
+              textAlign: "center",
+            }}>
+              {artistName}
+            </p>
+          )}
+
+          {/* Progress bar (decorative) */}
+          <div style={{ width: "100%", marginTop: "8px" }}>
+            <div style={{ height: "3px", borderRadius: "2px", backgroundColor: "rgba(255,255,255,0.12)", overflow: "hidden" }}>
+              <div className="progress-bar" />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px" }}>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>0:00</span>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)" }}>—:——</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Song info */}
-      <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-        <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.45)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-          ♪ now playing
-        </span>
-        <p style={{
-          color: "#ffffff",
-          fontWeight: 700,
-          fontSize: "15px",
-          margin: 0,
-          letterSpacing: "-0.3px",
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(6px)",
-          transition: "opacity 0.3s ease, transform 0.3s ease",
-          minWidth: "220px",
-          textAlign: "center",
-        }}>
-          {queue[index]}
-        </p>
-      </div>
-
       <style jsx>{`
-        .vinyl {
-          width: 200px;
-          height: 200px;
-          position: relative;
-        }
-        .vinyl-disc {
-          width: 200px;
-          height: 200px;
-          border-radius: 50%;
-          background: #111;
-          position: relative;
-          animation: spin 4s linear infinite;
-          box-shadow: 0 0 0 2px #222, 0 16px 48px rgba(0,0,0,0.6);
-          overflow: hidden;
-        }
-        .vinyl-grooves {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          background: repeating-radial-gradient(
-            circle at center,
-            transparent 0px,
-            transparent 3px,
-            rgba(255,255,255,0.03) 3px,
-            rgba(255,255,255,0.03) 4px
-          );
-        }
-        .vinyl-label {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
+        .eq-bars {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          color: rgba(255,255,255,0.5);
-          box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
-          overflow: hidden;
+          align-items: flex-end;
+          gap: 2px;
+          height: 12px;
         }
-        .vinyl-hole {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: rgba(0,0,0,0.8);
-          z-index: 10;
-          box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+        .eq-bar {
+          display: block;
+          width: 3px;
+          border-radius: 2px;
+          background: #1db954;
+          animation: eq 0.8s ease-in-out infinite alternate;
         }
-        .vinyl-sheen {
-          position: absolute;
-          inset: 0;
-          border-radius: 50%;
-          background: linear-gradient(
-            135deg,
-            rgba(255,255,255,0.07) 0%,
-            transparent 50%,
-            rgba(255,255,255,0.03) 100%
-          );
-          pointer-events: none;
+        @keyframes eq {
+          from { height: 3px; }
+          to   { height: 12px; }
         }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+        .progress-bar {
+          height: 100%;
+          width: 35%;
+          border-radius: 2px;
+          background: #ffffff;
+          animation: progress 1s linear infinite;
+        }
+        @keyframes progress {
+          0%   { width: 30%; }
+          100% { width: 65%; }
         }
       `}</style>
     </div>
