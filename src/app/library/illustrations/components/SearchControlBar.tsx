@@ -1,7 +1,65 @@
 "use client";
 
+import React, { useState } from "react";
 import Link from "next/link";
 import { UserRole, can } from "@/lib/permissions";
+
+export type CardSize = "small" | "normal" | "large";
+
+const SIZE_OPTIONS: { size: CardSize; icon: React.ReactNode }[] = [
+  { size: "small", icon: (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
+      <rect x="0" y="0" width="4" height="4" rx="0.8"/><rect x="5.5" y="0" width="4" height="4" rx="0.8"/><rect x="11" y="0" width="4" height="4" rx="0.8"/>
+      <rect x="0" y="5.5" width="4" height="4" rx="0.8"/><rect x="5.5" y="5.5" width="4" height="4" rx="0.8"/><rect x="11" y="5.5" width="4" height="4" rx="0.8"/>
+      <rect x="0" y="11" width="4" height="4" rx="0.8"/><rect x="5.5" y="11" width="4" height="4" rx="0.8"/><rect x="11" y="11" width="4" height="4" rx="0.8"/>
+    </svg>
+  )},
+  { size: "normal", icon: (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
+      <rect x="0" y="0" width="6.5" height="6.5" rx="1.2"/><rect x="8.5" y="0" width="6.5" height="6.5" rx="1.2"/>
+      <rect x="0" y="8.5" width="6.5" height="6.5" rx="1.2"/><rect x="8.5" y="8.5" width="6.5" height="6.5" rx="1.2"/>
+    </svg>
+  )},
+  { size: "large", icon: (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor">
+      <rect x="0" y="0" width="15" height="6.5" rx="1.5"/>
+      <rect x="0" y="8.5" width="15" height="6.5" rx="1.5"/>
+    </svg>
+  )},
+];
+
+function SizeDropdown({ cardSize, onCardSizeChange }: { cardSize: CardSize; onCardSizeChange: (s: CardSize) => void }) {
+  const [open, setOpen] = useState(false);
+  const current = SIZE_OPTIONS.find(o => o.size === cardSize)!;
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        title="Card size"
+        style={{ width: "48px", height: "48px", borderRadius: "50%", border: "1px solid var(--border-color)", backgroundColor: "var(--input-bg)", color: "var(--text-secondary)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+      >
+        {current.icon}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 999 }} />
+          <div style={{ position: "absolute", top: "56px", right: 0, zIndex: 1000, backgroundColor: "var(--background)", border: "1px solid var(--border-color)", borderRadius: "14px", padding: "6px", display: "flex", flexDirection: "column", gap: "2px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}>
+            {SIZE_OPTIONS.map(({ size, icon }) => (
+              <button
+                key={size}
+                onClick={() => { onCardSizeChange(size); setOpen(false); }}
+                style={{ width: "44px", height: "44px", borderRadius: "10px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: cardSize === size ? "#ede9fe" : "transparent", color: cardSize === size ? "#7c3aed" : "var(--text-secondary)", transition: "background 0.15s" }}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 interface SearchControlBarProps {
   searchQuery: string;
@@ -14,11 +72,14 @@ interface SearchControlBarProps {
   selectedIdsCount: number;
   onBulkDelete: () => void;
   role: UserRole;
+  cardSize: CardSize;
+  onCardSizeChange: (size: CardSize) => void;
 }
 
 export default function SearchControlBar({
   searchQuery, onSearchChange, onFilterClick, isFilterActive,
   onUploadClick, isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete, role,
+  cardSize, onCardSizeChange,
 }: SearchControlBarProps) {
   const canUpload = can.upload(role);
   const canDelete = can.delete(role);
@@ -67,6 +128,9 @@ export default function SearchControlBar({
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
             </svg>
           </button>
+
+          {/* Card size dropdown */}
+          <SizeDropdown cardSize={cardSize} onCardSizeChange={onCardSizeChange} />
 
           {/* Delete (bulk) — CREATOR + SUPERADMIN */}
           {canDelete && (

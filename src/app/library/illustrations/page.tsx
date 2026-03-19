@@ -8,7 +8,7 @@ import { Illustration } from "@/types/illustration";
 import { useUploadFlow } from "./hooks/useUploadFlow";
 import UploadModal from "./components/UploadModal";
 import IllustrationCard from "./components/IllustrationCard";
-import SearchControlBar from "./components/SearchControlBar";
+import SearchControlBar, { CardSize } from "./components/SearchControlBar";
 import FilterSidebar, { SortBy, ViewFilters } from "./components/FilterSidebar";
 import { useSession } from "@/hooks/useSession";
 import { can, NAME_TAGS } from "@/lib/permissions";
@@ -39,6 +39,9 @@ export default function IllustrationsLibrary() {
     window.addEventListener("graphicsLabThemeChange", handler);
     return () => window.removeEventListener("graphicsLabThemeChange", handler);
   }, []);
+
+  // Card size
+  const [cardSize, setCardSize] = useState<CardSize>("normal");
 
   // Filter sidebar
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
@@ -114,7 +117,9 @@ export default function IllustrationsLibrary() {
   const filteredIllustrations = (() => {
     let result = illustrations.filter((item) => {
       const name = item.name.toLowerCase();
-      if (!name.includes(searchQuery.toLowerCase())) return false;
+      const nameTag = (item.name_tag || "").toLowerCase();
+      const query = searchQuery.toLowerCase();
+      if (!name.includes(query) && !nameTag.includes(query)) return false;
 
       const anyViewActive = Object.values(viewFilters).some(Boolean);
       if (!anyViewActive) return true;
@@ -248,6 +253,8 @@ export default function IllustrationsLibrary() {
         selectedIdsCount={selectedIds.size}
         onBulkDelete={handleBulkDelete}
         role={role}
+        cardSize={cardSize}
+        onCardSizeChange={setCardSize}
       />
 
       <h1 style={{ fontSize: "32px", fontWeight: 700, margin: "16px 0 32px", color: "var(--text-primary)" }}>
@@ -268,8 +275,9 @@ export default function IllustrationsLibrary() {
           </div>
         );
 
+        const colWidth = cardSize === "small" ? "160px" : cardSize === "large" ? "340px" : "240px";
         const renderGrid = (items: typeof filteredIllustrations) => (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(${colWidth}, 1fr))`, gap: "24px" }}>
             {items.map(illustration => (
               <IllustrationCard
                 key={illustration.id}
