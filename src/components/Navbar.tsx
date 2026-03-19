@@ -8,6 +8,7 @@ import SidebarProfileView from "./navbar/SidebarProfileView";
 import SidebarMediaView from "./navbar/SidebarMediaView";
 import { useSession, clearAdminSession, clearUserSession, notifySessionChange } from "@/hooks/useSession";
 import { can, ROLE_CONFIG } from "@/lib/permissions";
+import { setMusicMuted, getMusicMuted } from "@/lib/musicPlayer";
 
 export default function Navbar() {
   const router = useRouter();
@@ -16,9 +17,7 @@ export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads">("menu");
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isMusicMuted, setIsMusicMuted] = useState(() =>
-    typeof window !== "undefined" && localStorage.getItem("graphicsLabMusicMuted") === "true"
-  );
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -117,11 +116,15 @@ export default function Navbar() {
     window.dispatchEvent(new CustomEvent("graphicsLabThemeChange", { detail: { dark: next } }));
   };
 
+  // Sync mute state from musicPlayer on mount
+  useEffect(() => {
+    setIsMusicMuted(getMusicMuted());
+  }, []);
+
   const toggleMusic = () => {
     const next = !isMusicMuted;
     setIsMusicMuted(next);
-    localStorage.setItem("graphicsLabMusicMuted", String(next));
-    window.dispatchEvent(new CustomEvent("graphicsLabMusicToggle", { detail: { muted: next } }));
+    setMusicMuted(next);
   };
 
   const handleNavigation = (href: string) => {

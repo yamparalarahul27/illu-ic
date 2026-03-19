@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { playPreview, stopPreview } from "@/lib/musicPlayer";
 
 const SONGS = [
   // The 1975 / Lana Del Rey
@@ -57,9 +58,7 @@ export default function LoadingOverlay() {
   const [visible, setVisible] = useState(true);
   const [albumArt, setAlbumArt] = useState<string | null>(null);
   const [artistName, setArtistName] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentSongRef = useRef<string>("");
-  const mutedRef = useRef(typeof window !== "undefined" && localStorage.getItem("graphicsLabMusicMuted") === "true");
 
   // Cycle songs every 3 seconds
   useEffect(() => {
@@ -82,25 +81,7 @@ export default function LoadingOverlay() {
 
   // Stop audio when overlay unmounts
   useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
-
-  // Listen for mute toggle from navbar
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const muted = (e as CustomEvent).detail?.muted ?? false;
-      mutedRef.current = muted;
-      if (muted) {
-        audioRef.current?.pause();
-      } else {
-        audioRef.current?.play().catch(() => {});
-      }
-    };
-    window.addEventListener("graphicsLabMusicToggle", handler);
-    return () => window.removeEventListener("graphicsLabMusicToggle", handler);
+    return () => stopPreview();
   }, []);
 
   useEffect(() => {
@@ -116,14 +97,7 @@ export default function LoadingOverlay() {
         if (result) {
           setAlbumArt(result.artworkUrl100.replace("100x100bb", "500x500bb"));
           setArtistName(result.artistName ?? null);
-
-          if (result.previewUrl) {
-            audioRef.current?.pause();
-            const audio = new Audio(result.previewUrl);
-            audio.volume = 0.6;
-            if (!mutedRef.current) audio.play().catch(() => {});
-            audioRef.current = audio;
-          }
+          if (result.previewUrl) playPreview(result.previewUrl);
         } else {
           setAlbumArt(null);
           setArtistName(null);
