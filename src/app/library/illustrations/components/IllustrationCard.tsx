@@ -144,11 +144,11 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             <button
               onClick={e => { e.stopPropagation(); onEditClick(illustration); }}
               title="Edit asset"
-              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", transition: "background-color 0.2s ease" }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#ffffff"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
+              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)", transition: "background-color 0.2s ease" }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkView ? "#1f2937" : "#ffffff"}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)"}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDarkView ? "#e5e7eb" : "#374151"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
               </svg>
@@ -160,11 +160,11 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             <button
               onClick={handleDownloadClick}
               title="Download"
-              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", transition: "background-color 0.2s ease" }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#ffffff"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
+              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)", transition: "background-color 0.2s ease" }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkView ? "#1f2937" : "#ffffff"}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)"}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isDarkView ? "#e5e7eb" : "#374151"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -192,7 +192,7 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ backgroundColor: "var(--background)", borderRadius: "20px", padding: "28px", width: "320px", boxShadow: "0 24px 48px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", gap: "16px" }}
+            style={{ backgroundColor: "var(--background)", borderRadius: "20px", padding: "28px", width: "320px", boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: "16px" }}
           >
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

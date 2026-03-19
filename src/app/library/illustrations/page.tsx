@@ -16,8 +16,7 @@ import { useSession } from "@/hooks/useSession";
 import { can, NAME_TAGS } from "@/lib/permissions";
 
 const DEFAULT_VIEW_FILTERS: ViewFilters = {
-  confirmed: false, inProgress: false, updated: false,
-  underReview: false, darkOnly: false, lightOnly: false,
+  confirmed: false, inProgress: false, underReview: false,
 };
 
 export default function IllustrationsLibrary() {
@@ -130,25 +129,23 @@ export default function IllustrationsLibrary() {
       const anyViewActive = Object.values(viewFilters).some(Boolean);
       if (!anyViewActive) return true;
 
-      if (viewFilters.darkOnly && name.includes("dark")) return true;
-      if (viewFilters.lightOnly && name.includes("light")) return true;
-      if (viewFilters.confirmed && name.includes("confirmed")) return true;
-      if (viewFilters.inProgress && (name.includes("progress") || name.includes("in_progress"))) return true;
-      if (viewFilters.updated && name.includes("updated")) return true;
-      if (viewFilters.underReview && (name.includes("review") || name.includes("under_review"))) return true;
+      if (viewFilters.confirmed && item.status === "CONFIRMED") return true;
+      if (viewFilters.inProgress && item.status === "IN_PROGRESS") return true;
+      if (viewFilters.underReview && item.status === "UNDER_REVIEW") return true;
 
       return false;
     });
 
     // Sort
-    if (sortBy === "oldest") {
-      result = [...result].reverse();
+    if (sortBy === "newest") {
+      result = [...result].sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime());
+    } else if (sortBy === "oldest") {
+      result = [...result].sort((a, b) => new Date(a.created_at ?? 0).getTime() - new Date(b.created_at ?? 0).getTime());
     } else if (sortBy === "az") {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortBy === "za") {
       result = [...result].sort((a, b) => b.name.localeCompare(a.name));
     }
-    // "newest" is already the default order from the DB query
 
     return result;
   })();

@@ -44,7 +44,7 @@ function SizeDropdown({ cardSize, onCardSizeChange }: { cardSize: CardSize; onCa
       {open && (
         <>
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 999 }} />
-          <div style={{ position: "absolute", top: "56px", right: 0, zIndex: 1000, backgroundColor: "var(--background)", border: "1px solid var(--border-color)", borderRadius: "14px", padding: "6px", display: "flex", flexDirection: "column", gap: "2px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}>
+          <div style={{ position: "absolute", top: "56px", right: 0, zIndex: 1000, backgroundColor: "var(--background)", borderRadius: "14px", padding: "6px", display: "flex", flexDirection: "column", gap: "2px", boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)" }}>
             {SIZE_OPTIONS.map(({ size, icon }) => (
               <button
                 key={size}

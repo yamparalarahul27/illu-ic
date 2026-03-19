@@ -28,8 +28,8 @@ export default function UploadModal({ uploadStep, setUploadStep, fileInputRef, d
     }}>
       <div style={{
         backgroundColor: "var(--background)", padding: "32px", borderRadius: "24px",
-        width: "100%", maxWidth: "450px", boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-        display: "flex", flexDirection: "column", gap: "24px", border: "1px solid var(--border-color)",
+        width: "100%", maxWidth: "450px", boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)",
+        display: "flex", flexDirection: "column", gap: "24px",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>
