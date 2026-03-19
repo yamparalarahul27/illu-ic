@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const SONGS = [
   "Robbers",
@@ -27,6 +27,8 @@ export default function LoadingOverlay() {
   const [visible, setVisible] = useState(true);
   const [albumArt, setAlbumArt] = useState<string | null>(null);
   const [artistName, setArtistName] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentSongRef = useRef<string>("");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -46,15 +48,36 @@ export default function LoadingOverlay() {
     return () => clearInterval(interval);
   }, []);
 
+  // Stop audio when overlay unmounts
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
   useEffect(() => {
     const song = queue[index];
+    currentSongRef.current = song;
+
     fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(song)}&media=music&limit=1`)
       .then(r => r.json())
       .then(data => {
+        // Song already changed while waiting — skip
+        if (currentSongRef.current !== song) return;
+
         const result = data.results?.[0];
         if (result) {
           setAlbumArt(result.artworkUrl100.replace("100x100bb", "500x500bb"));
           setArtistName(result.artistName ?? null);
+
+          if (result.previewUrl) {
+            audioRef.current?.pause();
+            const audio = new Audio(result.previewUrl);
+            audio.volume = 0.6;
+            audio.play().catch(() => {});
+            audioRef.current = audio;
+          }
         } else {
           setAlbumArt(null);
           setArtistName(null);
