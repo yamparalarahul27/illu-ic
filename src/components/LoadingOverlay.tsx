@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 
 const SONGS = [
+  // The 1975 / Lana Del Rey
   "Robbers",
   "Sweater Weather",
   "About You",
@@ -19,6 +20,35 @@ const SONGS = [
   "Summertime Sadness",
   "Doing Time",
   "Born to Die",
+  // Linkin Park — From Zero
+  "The Emptiness Machine",
+  "Heavy Is The Crown",
+  "Over Each Other",
+  "Casualty",
+  "Two Faced",
+  "Good Things Go",
+  // Linkin Park — Hybrid Theory
+  "Crawling",
+  "In the End",
+  "One Step Closer",
+  "Papercut",
+  "Points of Authority",
+  "With You",
+  "A Place for My Head",
+  // Linkin Park — Meteora
+  "Numb",
+  "Somewhere I Belong",
+  "Faint",
+  "Breaking the Habit",
+  "Lying from You",
+  "From the Inside",
+  // Linkin Park — Minutes to Midnight
+  "What I've Done",
+  "Bleed It Out",
+  "Shadow of the Day",
+  "Given Up",
+  "Leave Out All the Rest",
+  "In Pieces",
 ];
 
 export default function LoadingOverlay() {
