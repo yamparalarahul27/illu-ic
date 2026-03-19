@@ -6,7 +6,7 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 import SidebarMenuView from "./navbar/SidebarMenuView";
 import SidebarProfileView from "./navbar/SidebarProfileView";
 import SidebarMediaView from "./navbar/SidebarMediaView";
-import { useSession, clearAdminSession, clearUserSession } from "@/hooks/useSession";
+import { useSession, clearAdminSession, clearUserSession, notifySessionChange } from "@/hooks/useSession";
 import { can, ROLE_CONFIG } from "@/lib/permissions";
 
 export default function Navbar() {
@@ -65,11 +65,24 @@ export default function Navbar() {
   }, []);
 
   const handleUpdateProfile = () => {
-    if (editName.trim()) {
-      localStorage.setItem("graphicsLabUserName", editName.trim());
+    const name = editName.trim();
+    const email = editEmail.trim();
+
+    // Write back to the correct session key so useSession picks it up
+    const adminRaw = localStorage.getItem("graphicsLabAdminSession");
+    if (adminRaw) {
+      try {
+        const parsed = JSON.parse(adminRaw);
+        localStorage.setItem("graphicsLabAdminSession", JSON.stringify({ ...parsed, name, email }));
+      } catch { /* ignore */ }
+    } else {
+      const userRaw = localStorage.getItem("graphicsLabCommentUser");
+      const existing = userRaw ? JSON.parse(userRaw) : {};
+      localStorage.setItem("graphicsLabCommentUser", JSON.stringify({ ...existing, name, email }));
     }
-    localStorage.setItem("graphicsLabUserEmail", editEmail.trim());
+
     localStorage.setItem("graphicsLabUserTeam", editTeam.trim());
+    notifySessionChange();
     setIsEditingName(false); setIsEditingEmail(false); setIsEditingTeam(false);
     setShowSuccessMsg(true);
     setTimeout(() => setShowSuccessMsg(false), 3000);
@@ -107,6 +120,9 @@ export default function Navbar() {
   };
 
   const displayName = session.isLoaded ? session.name : "";
+  const avatarInitials = displayName
+    ? displayName.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join("")
+    : "";
   const roleCfg = session.role && ROLE_CONFIG[session.role];
   const isAdminMode = mounted && (isAdminOverride !== null ? isAdminOverride : (session.isLoaded && session.mode === "admin"));
 
@@ -159,7 +175,7 @@ export default function Navbar() {
             onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
           >
-            {displayName ? displayName.charAt(0).toUpperCase() : (
+            {avatarInitials ? avatarInitials : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>

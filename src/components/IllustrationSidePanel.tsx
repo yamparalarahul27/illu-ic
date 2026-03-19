@@ -40,6 +40,9 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
   const [nameTag, setNameTag] = useState("");
   const [savingTag, setSavingTag] = useState(false);
   const [resolveToast, setResolveToast] = useState(false);
+  const [versions, setVersions] = useState<{ id: number; image_url: string; dark_image_url: string | null; created_at: string }[]>([]);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState<{ image_url: string; dark_image_url: string | null; created_at: string } | null>(null);
 
   const canAssignStatus = can.assignStatusTag(role);
   const canAssignNameTag = can.assignNameTag(role);
@@ -69,8 +72,20 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
 
       setNameTag(illustration.name_tag ?? "");
       fetchComments();
+      fetchVersions(illustration.id);
+      setShowVersionHistory(false);
+      setPreviewVersion(null);
     }
   }, [illustration]);
+
+  const fetchVersions = async (id: number) => {
+    const { data } = await supabase
+      .from("illustration_versions")
+      .select("id, image_url, dark_image_url, created_at")
+      .eq("illustration_id", id)
+      .order("created_at", { ascending: false });
+    setVersions(data ?? []);
+  };
 
   const handleStatusChange = async (status: string) => {
     if (!illustration) return;
@@ -461,6 +476,72 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
             </div>
           )}
 
+
+          {/* Version History */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <button
+              onClick={() => setShowVersionHistory(v => !v)}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Version History {versions.length > 0 && `(${versions.length})`}
+                </span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showVersionHistory ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+
+            {showVersionHistory && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {versions.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", padding: "12px", backgroundColor: "var(--input-bg)", borderRadius: "10px", textAlign: "center" }}>
+                    No previous versions yet. Edit the asset to create one.
+                  </p>
+                ) : (
+                  versions.map((v) => (
+                    <div
+                      key={v.id}
+                      onClick={() => setPreviewVersion(previewVersion?.created_at === v.created_at ? null : v)}
+                      style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px", borderRadius: "12px", border: "1px solid var(--border-color)", backgroundColor: previewVersion?.created_at === v.created_at ? "#ede9fe" : "var(--input-bg)", cursor: "pointer", transition: "background 0.15s" }}
+                    >
+                      <div style={{ width: "48px", height: "48px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--card-bg)", border: "1px solid var(--border-color)" }}>
+                        <img src={v.image_url} alt="version" style={{ width: "100%", height: "100%", objectFit: "contain", padding: "4px" }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                          {new Date(v.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                        </p>
+                        <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
+                          {new Date(v.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                          {v.dark_image_url ? " · Light + Dark" : " · Light only"}
+                        </p>
+                      </div>
+                      <a href={v.image_url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} title="Open in new tab" style={{ color: "var(--text-secondary)", flexShrink: 0 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                      </a>
+                    </div>
+                  ))
+                )}
+
+                {/* Inline preview of selected version */}
+                {previewVersion && (
+                  <div style={{ borderRadius: "12px", overflow: "hidden", border: "1px solid #c4b5fd", backgroundColor: "#f5f3ff" }}>
+                    <img src={previewVersion.image_url} alt="version preview" style={{ width: "100%", objectFit: "contain", maxHeight: "200px", padding: "16px" }} />
+                    {previewVersion.dark_image_url && (
+                      <img src={previewVersion.dark_image_url} alt="dark version preview" style={{ width: "100%", objectFit: "contain", maxHeight: "200px", padding: "16px", backgroundColor: "#1f2937" }} />
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <CommentsList
             comments={comments}

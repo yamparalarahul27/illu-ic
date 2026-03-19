@@ -13,9 +13,10 @@ interface IllustrationCardProps {
   isSelectionMode?: boolean;
   commentCount?: number;
   isDarkView?: boolean;
+  onEditClick?: (illustration: Illustration) => void;
 }
 
-export default function IllustrationCard({ illustration, onClick, isSelected, isSelectionMode, commentCount = 0, isDarkView = false }: IllustrationCardProps) {
+export default function IllustrationCard({ illustration, onClick, isSelected, isSelectionMode, commentCount = 0, isDarkView = false, onEditClick }: IllustrationCardProps) {
   const [showDownloadPopup, setShowDownloadPopup] = useState(false);
   const [pngSize, setPngSize] = useState<"1x" | "2x" | "3x">("1x");
   const [svgCopied, setSvgCopied] = useState(false);
@@ -138,6 +139,22 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             className="illustration-img"
           />
 
+          {/* Edit button — bottom-left of image */}
+          {!isSelectionMode && onEditClick && (
+            <button
+              onClick={e => { e.stopPropagation(); onEditClick(illustration); }}
+              title="Edit asset"
+              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.15)", transition: "background-color 0.2s ease" }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#ffffff"}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.9)"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          )}
+
           {/* Download button — bottom-right of image */}
           {!isSelectionMode && (
             <button
@@ -162,9 +179,7 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             {displayName}
           </h3>
           {statusCfg && (
-            <span style={{ flexShrink: 0, padding: "2px 8px", borderRadius: "20px", fontSize: "10px", fontWeight: 700, backgroundColor: statusCfg.bg, color: statusCfg.color, whiteSpace: "nowrap", letterSpacing: "0.03em" }}>
-              {statusCfg.label}
-            </span>
+            <div title={statusCfg.label} style={{ flexShrink: 0, width: "8px", height: "8px", borderRadius: "50%", backgroundColor: statusCfg.color }} />
           )}
         </div>
       </div>

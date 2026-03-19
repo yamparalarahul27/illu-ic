@@ -6,7 +6,9 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 import { supabase } from "@/lib/supabase";
 import { Illustration } from "@/types/illustration";
 import { useUploadFlow } from "./hooks/useUploadFlow";
+import { useEditFlow } from "./hooks/useEditFlow";
 import UploadModal from "./components/UploadModal";
+import EditAssetModal from "./components/EditAssetModal";
 import IllustrationCard from "./components/IllustrationCard";
 import SearchControlBar, { CardSize } from "./components/SearchControlBar";
 import FilterSidebar, { SortBy, ViewFilters } from "./components/FilterSidebar";
@@ -71,6 +73,10 @@ export default function IllustrationsLibrary() {
   const upload = useUploadFlow((newIllustration) => {
     setIllustrations([newIllustration, ...illustrations]);
     setSelectedId(newIllustration.id);
+  });
+
+  const edit = useEditFlow((id, fields) => {
+    setIllustrations(prev => prev.map(ill => ill.id === id ? { ...ill, ...fields } : ill));
   });
 
   useEffect(() => {
@@ -241,6 +247,23 @@ export default function IllustrationsLibrary() {
 
       <input type="file" accept="image/*" ref={upload.fileInputRef} onChange={upload.handleLightUpload} style={{ display: "none" }} />
       <input type="file" accept="image/*" ref={upload.darkFileInputRef} onChange={upload.handleDarkUpload} style={{ display: "none" }} />
+      <input type="file" accept="image/*" ref={edit.fileInputRef} onChange={edit.handleLightUpload} style={{ display: "none" }} />
+      <input type="file" accept="image/*" ref={edit.darkFileInputRef} onChange={edit.handleDarkUpload} style={{ display: "none" }} />
+
+      {edit.showEditModal && edit.editingIllustration && (
+        <EditAssetModal
+          illustration={edit.editingIllustration}
+          uploadStep={edit.uploadStep}
+          setUploadStep={edit.setUploadStep}
+          fileInputRef={edit.fileInputRef}
+          darkFileInputRef={edit.darkFileInputRef}
+          isUploading={edit.isUploading}
+          isDarkView={isDarkView}
+          uploadError={edit.uploadError}
+          onClose={edit.closeEditModal}
+          onFinalize={edit.finalizeEdit}
+        />
+      )}
 
       <SearchControlBar
         searchQuery={searchQuery}
@@ -287,6 +310,7 @@ export default function IllustrationsLibrary() {
                 isSelectionMode={isSelectionMode}
                 commentCount={commentCounts[illustration.id] || 0}
                 isDarkView={isDarkView}
+                onEditClick={can.upload(role) ? edit.openEditModal : undefined}
               />
             ))}
           </div>
