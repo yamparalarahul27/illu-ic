@@ -59,7 +59,9 @@ export default function LoadingOverlay() {
   const [artistName, setArtistName] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentSongRef = useRef<string>("");
+  const mutedRef = useRef(typeof window !== "undefined" && localStorage.getItem("graphicsLabMusicMuted") === "true");
 
+  // Cycle songs every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setVisible(false);
@@ -74,7 +76,7 @@ export default function LoadingOverlay() {
         });
         setVisible(true);
       }, 300);
-    }, 1000);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -86,6 +88,21 @@ export default function LoadingOverlay() {
     };
   }, []);
 
+  // Listen for mute toggle from navbar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const muted = (e as CustomEvent).detail?.muted ?? false;
+      mutedRef.current = muted;
+      if (muted) {
+        audioRef.current?.pause();
+      } else {
+        audioRef.current?.play().catch(() => {});
+      }
+    };
+    window.addEventListener("graphicsLabMusicToggle", handler);
+    return () => window.removeEventListener("graphicsLabMusicToggle", handler);
+  }, []);
+
   useEffect(() => {
     const song = queue[index];
     currentSongRef.current = song;
@@ -93,7 +110,6 @@ export default function LoadingOverlay() {
     fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(song)}&media=music&limit=1`)
       .then(r => r.json())
       .then(data => {
-        // Song already changed while waiting — skip
         if (currentSongRef.current !== song) return;
 
         const result = data.results?.[0];
@@ -105,7 +121,7 @@ export default function LoadingOverlay() {
             audioRef.current?.pause();
             const audio = new Audio(result.previewUrl);
             audio.volume = 0.6;
-            audio.play().catch(() => {});
+            if (!mutedRef.current) audio.play().catch(() => {});
             audioRef.current = audio;
           }
         } else {
