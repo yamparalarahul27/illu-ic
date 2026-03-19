@@ -4,9 +4,6 @@ interface SidebarMenuViewProps {
   onClose: () => void;
   onNavigate: (view: "profile" | "saved" | "downloads") => void;
   onSyncData: () => void;
-  isDarkMode: boolean;
-  mounted: boolean;
-  onToggleDarkMode: () => void;
   isAdmin?: boolean;
   onNavigateToAdmin?: () => void;
   isAdminMode?: boolean;
@@ -14,7 +11,7 @@ interface SidebarMenuViewProps {
   onLogin?: () => void;
 }
 
-export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDarkMode, mounted, onToggleDarkMode, isAdmin, onNavigateToAdmin, isAdminMode, onLogout, onLogin }: SidebarMenuViewProps) {
+export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isAdmin, onNavigateToAdmin, isAdminMode, onLogout, onLogin }: SidebarMenuViewProps) {
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
@@ -43,30 +40,6 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDar
         <div onClick={() => { onSyncData(); onNavigate("downloads"); }} style={menuItemStyle}>Downloads</div>
 
         <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderRadius: "12px", backgroundColor: "var(--input-bg)", color: "var(--text-primary)", fontWeight: 500 }}>
-            <span>Dark Mode</span>
-            {mounted && (
-              <div
-                onClick={onToggleDarkMode}
-                style={{
-                  width: "48px", height: "24px",
-                  backgroundColor: isDarkMode ? "#7c3aed" : "#e5e7eb",
-                  borderRadius: "24px", position: "relative", cursor: "pointer",
-                  transition: "background-color 0.3s ease",
-                  display: "flex", alignItems: "center", padding: "2px", flexShrink: 0
-                }}
-              >
-                <div style={{
-                  width: "20px", height: "20px", backgroundColor: "#ffffff",
-                  borderRadius: "50%", position: "absolute", top: "2px",
-                  left: isDarkMode ? "26px" : "2px",
-                  transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
-                }} />
-              </div>
-            )}
-          </div>
-
           {isAdminMode ? (
             <div onClick={onLogout} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
           ) : (

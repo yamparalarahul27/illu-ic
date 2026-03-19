@@ -8,7 +8,7 @@ export const can = {
   upload:           (role: UserRole) => ['SUPERADMIN', 'CREATOR'].includes(role),
   delete:           (role: UserRole) => ['SUPERADMIN', 'CREATOR'].includes(role),
   update:           (role: UserRole) => ['SUPERADMIN', 'CREATOR'].includes(role),
-  assignNameTag:    (role: UserRole) => ['SUPERADMIN', 'CREATOR'].includes(role),
+  assignNameTag:    (role: UserRole) => role !== 'USER',
   assignStatusTag:  (role: UserRole) => role === 'SUPERADMIN',
   seeAdminUI:       (role: UserRole) => role !== 'USER',
   seeAdminDashboard:(role: UserRole) => role === 'SUPERADMIN',
@@ -24,6 +24,16 @@ export const STATUS_CONFIG: Record<AssetStatus, { label: string; color: string; 
   IN_PROGRESS:  { label: 'In Progress',  color: '#2563eb', bg: '#dbeafe' },
   UNDER_REVIEW: { label: 'Under Review', color: '#d97706', bg: '#fef3c7' },
   REMOVED:      { label: 'Removed',      color: '#db2777', bg: '#fce7f3' },
+};
+
+export const NAME_TAGS = ['Auth', 'Home', 'Trading', 'Market', 'Wallet'] as const;
+export type NameTag = typeof NAME_TAGS[number];
+export const NAME_TAG_CONFIG: Record<NameTag, { color: string; bg: string }> = {
+  Auth:    { color: '#2563eb', bg: '#dbeafe' },
+  Home:    { color: '#059669', bg: '#d1fae5' },
+  Trading: { color: '#7c3aed', bg: '#ede9fe' },
+  Market:  { color: '#d97706', bg: '#fef3c7' },
+  Wallet:  { color: '#0891b2', bg: '#e0f2fe' },
 };
 
 export const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {

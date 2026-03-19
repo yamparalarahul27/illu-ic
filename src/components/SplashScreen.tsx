@@ -14,6 +14,7 @@ export default function SplashScreen() {
     const adminSession = localStorage.getItem('graphicsLabAdminSession');
     const userMode = localStorage.getItem('graphicsLabUserMode');
     if (adminSession || userMode) {
+      setIsRendered(false);
       router.replace('/dashboard');
       return;
     }

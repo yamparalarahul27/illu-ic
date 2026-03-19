@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import TagSelector from "@/components/TagSelector";
 
 interface UploadModalProps {
   uploadStep: "method" | "light" | "ask-dark" | "dark" | "complete";
@@ -9,9 +10,16 @@ interface UploadModalProps {
   darkFileInputRef: React.RefObject<HTMLInputElement | null>;
   onClose: () => void;
   onFinalize: () => void;
+  canAssignTag?: boolean;
+  nameTag?: string;
+  onNameTagChange?: (tag: string) => void;
+  availableTags?: string[];
+  onNewTag?: (tag: string) => void;
 }
 
-export default function UploadModal({ uploadStep, setUploadStep, fileInputRef, darkFileInputRef, onClose, onFinalize }: UploadModalProps) {
+export default function UploadModal({ uploadStep, setUploadStep, fileInputRef, darkFileInputRef, onClose, onFinalize, canAssignTag, nameTag = "", onNameTagChange, availableTags = [], onNewTag }: UploadModalProps) {
+  const canPublish = !canAssignTag || !!nameTag;
+
   return (
     <div style={{
       position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -47,9 +55,7 @@ export default function UploadModal({ uploadStep, setUploadStep, fileInputRef, d
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>Upload from computer</span>
             </button>
-            <div
-              style={{ height: "56px", backgroundColor: "var(--input-bg)", border: "1px solid var(--border-color)", borderRadius: "14px", display: "flex", alignItems: "center", padding: "0 20px", gap: "12px", opacity: 0.6, cursor: "default" }}
-            >
+            <div style={{ height: "56px", backgroundColor: "var(--input-bg)", border: "1px solid var(--border-color)", borderRadius: "14px", display: "flex", alignItems: "center", padding: "0 20px", gap: "12px", opacity: 0.6, cursor: "default" }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
               <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>Upload from Zoho Drive</span>
               <span style={{ marginLeft: "auto", fontSize: "11px", fontWeight: 700, color: "#7c3aed", backgroundColor: "#ede9fe", padding: "2px 8px", borderRadius: "6px", letterSpacing: "0.5px" }}>WIP</span>
@@ -91,14 +97,37 @@ export default function UploadModal({ uploadStep, setUploadStep, fileInputRef, d
         )}
 
         {uploadStep === "complete" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             <div style={{ textAlign: "center", color: "#16a34a" }}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ margin: "0 auto 12px" }}><polyline points="20 6 9 17 4 12"></polyline></svg>
               <p style={{ margin: 0, fontWeight: 700 }}>Great! Versions are ready.</p>
             </div>
+
+            {canAssignTag && onNameTagChange && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Label <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <TagSelector
+                  value={nameTag}
+                  onChange={onNameTagChange}
+                  availableTags={availableTags}
+                  onNewTag={onNewTag}
+                  required={!nameTag}
+                />
+              </div>
+            )}
+
             <button
               onClick={onFinalize}
-              style={{ height: "48px", borderRadius: "12px", background: "#7c3aed", color: "#ffffff", border: "none", fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}
+              disabled={!canPublish}
+              style={{
+                height: "48px", borderRadius: "12px", border: "none", fontWeight: 700, cursor: canPublish ? "pointer" : "not-allowed",
+                background: canPublish ? "#7c3aed" : "var(--border-color)",
+                color: canPublish ? "#ffffff" : "var(--text-secondary)",
+                boxShadow: canPublish ? "0 4px 12px rgba(124,58,237,0.3)" : "none",
+                transition: "all 0.2s ease",
+              }}
             >
               Confirm & Publish
             </button>

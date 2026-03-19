@@ -11,6 +11,7 @@ import IllustrationCard from "./components/IllustrationCard";
 import SearchControlBar from "./components/SearchControlBar";
 import FilterSidebar, { SortBy, ViewFilters } from "./components/FilterSidebar";
 import { useSession } from "@/hooks/useSession";
+import { can, NAME_TAGS } from "@/lib/permissions";
 
 const DEFAULT_VIEW_FILTERS: ViewFilters = {
   confirmed: false, inProgress: false, updated: false,
@@ -29,8 +30,15 @@ export default function IllustrationsLibrary() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
 
-  // Light / Dark view toggle
+  // Light / Dark view — synced with global Navbar theme toggle
   const [isDarkView, setIsDarkView] = useState(false);
+
+  useEffect(() => {
+    setIsDarkView(localStorage.getItem("graphicsLabTheme") === "dark");
+    const handler = (e: Event) => setIsDarkView((e as CustomEvent).detail?.dark ?? false);
+    window.addEventListener("graphicsLabThemeChange", handler);
+    return () => window.removeEventListener("graphicsLabThemeChange", handler);
+  }, []);
 
   // Filter sidebar
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
@@ -38,6 +46,24 @@ export default function IllustrationsLibrary() {
   const [viewFilters, setViewFilters] = useState<ViewFilters>(DEFAULT_VIEW_FILTERS);
 
   const isFilterActive = sortBy !== "newest" || Object.values(viewFilters).some(Boolean);
+
+  // Custom tags persisted in localStorage so new labels are never forgotten
+  const [customTags, setCustomTags] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem("graphicsLabCustomTags") || "[]"); } catch { return []; }
+  });
+
+  const handleNewTag = (tag: string) => {
+    setCustomTags(prev => {
+      if (prev.includes(tag)) return prev;
+      const next = [...prev, tag];
+      localStorage.setItem("graphicsLabCustomTags", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // Merge predefined + persisted custom + any tags already on illustrations
+  const availableTags = [...new Set([...NAME_TAGS, ...customTags, ...illustrations.map(i => i.name_tag).filter((t): t is string => !!t)])];
 
   const upload = useUploadFlow((newIllustration) => {
     setIllustrations([newIllustration, ...illustrations]);
@@ -179,6 +205,11 @@ export default function IllustrationsLibrary() {
           darkFileInputRef={upload.darkFileInputRef}
           onClose={upload.closeModal}
           onFinalize={upload.finalizeUpload}
+          canAssignTag={can.assignNameTag(role)}
+          nameTag={upload.nameTag}
+          onNameTagChange={upload.setNameTag}
+          availableTags={availableTags}
+          onNewTag={handleNewTag}
         />
       )}
 
@@ -187,6 +218,9 @@ export default function IllustrationsLibrary() {
         onClose={() => setSelectedId(null)}
         onDelete={handleDeleteIllustration}
         role={role}
+        isDarkView={isDarkView}
+        availableTags={availableTags}
+        onNewTag={handleNewTag}
         onIllustrationUpdate={(id, fields) => {
           setIllustrations(prev => prev.map(ill => ill.id === id ? { ...ill, ...fields } : ill));
         }}
@@ -208,8 +242,6 @@ export default function IllustrationsLibrary() {
         onSearchChange={setSearchQuery}
         onFilterClick={() => setFilterSidebarOpen(true)}
         isFilterActive={isFilterActive}
-        isDarkView={isDarkView}
-        onToggleDarkView={() => setIsDarkView(v => !v)}
         onUploadClick={upload.openModal}
         isSelectionMode={isSelectionMode}
         onToggleSelectionMode={() => { setIsSelectionMode(!isSelectionMode); setSelectedIds(new Set()); }}
@@ -222,26 +254,61 @@ export default function IllustrationsLibrary() {
         Illustrations Library
       </h1>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "24px" }}>
-        {filteredIllustrations.length > 0 ? (
-          filteredIllustrations.map((illustration) => (
-            <IllustrationCard
-              key={illustration.id}
-              illustration={illustration}
-              onClick={handleCardClick}
-              isSelected={selectedIds.has(illustration.id)}
-              isSelectionMode={isSelectionMode}
-              commentCount={commentCounts[illustration.id] || 0}
-              isDarkView={isDarkView}
-            />
-          ))
-        ) : (
-          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "64px 0", color: "var(--text-secondary)" }}>
+      {(() => {
+        const sections = availableTags
+          .map(tag => ({ tag, items: filteredIllustrations.filter(i => i.name_tag === tag) }))
+          .filter(s => s.items.length > 0);
+        const untagged = filteredIllustrations.filter(i => !i.name_tag);
+        const hasAny = sections.length > 0 || untagged.length > 0;
+
+        if (!hasAny) return (
+          <div style={{ textAlign: "center", padding: "64px 0", color: "var(--text-secondary)" }}>
             <p style={{ fontSize: "18px", fontWeight: 500 }}>No illustrations found.</p>
             <p style={{ marginTop: "8px" }}>Try adjusting your filters or search query.</p>
           </div>
-        )}
-      </div>
+        );
+
+        const renderGrid = (items: typeof filteredIllustrations) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "24px" }}>
+            {items.map(illustration => (
+              <IllustrationCard
+                key={illustration.id}
+                illustration={illustration}
+                onClick={handleCardClick}
+                isSelected={selectedIds.has(illustration.id)}
+                isSelectionMode={isSelectionMode}
+                commentCount={commentCounts[illustration.id] || 0}
+                isDarkView={isDarkView}
+              />
+            ))}
+          </div>
+        );
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
+            {sections.map(({ tag, items }) => (
+              <div key={tag}>
+                <div style={{ display: "inline-block", marginBottom: "24px" }}>
+                  <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#6d28d9", margin: 0, letterSpacing: "-0.3px", padding: "10px 20px", backgroundColor: "#ede9fe", border: "1.5px solid #c4b5fd", borderRadius: "14px", display: "inline-block" }}>
+                    {tag}
+                  </h2>
+                </div>
+                {renderGrid(items)}
+              </div>
+            ))}
+            {untagged.length > 0 && (
+              <div>
+                <div style={{ display: "inline-block", marginBottom: "24px" }}>
+                  <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#6d28d9", margin: 0, letterSpacing: "-0.3px", padding: "10px 20px", backgroundColor: "#ede9fe", border: "1.5px solid #c4b5fd", borderRadius: "14px", display: "inline-block" }}>
+                    Uncategorised
+                  </h2>
+                </div>
+                {renderGrid(untagged)}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <style dangerouslySetInnerHTML={{__html: `
         .illustration-card:hover {

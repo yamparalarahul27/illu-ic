@@ -9,6 +9,7 @@ export function useUploadFlow(onSuccess: (data: any) => void) {
   const [tempLightUrl, setTempLightUrl] = useState<string | null>(null);
   const [tempDarkUrl, setTempDarkUrl] = useState<string | null>(null);
   const [tempName, setTempName] = useState("");
+  const [nameTag, setNameTag] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,13 +71,12 @@ export function useUploadFlow(onSuccess: (data: any) => void) {
     if (!tempLightUrl) return;
 
     setIsUploading(true);
-    const insertData: { name: string; image_url: string; dark_image_url?: string } = {
+    const insertData: { name: string; image_url: string; dark_image_url?: string; name_tag?: string } = {
       name: tempName,
       image_url: tempLightUrl,
     };
-    if (tempDarkUrl) {
-      insertData.dark_image_url = tempDarkUrl;
-    }
+    if (tempDarkUrl) insertData.dark_image_url = tempDarkUrl;
+    if (nameTag) insertData.name_tag = nameTag;
 
     const { data, error } = await supabase
       .from('illustrations')
@@ -97,6 +97,7 @@ export function useUploadFlow(onSuccess: (data: any) => void) {
     setTempLightUrl(null);
     setTempDarkUrl(null);
     setTempName("");
+    setNameTag("");
   };
 
   const openModal = () => setShowUploadModal(true);
@@ -118,5 +119,7 @@ export function useUploadFlow(onSuccess: (data: any) => void) {
     finalizeUpload,
     openModal,
     closeModal,
+    nameTag,
+    setNameTag,
   };
 }
