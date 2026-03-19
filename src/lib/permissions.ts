@@ -13,6 +13,7 @@ export const can = {
   seeAdminUI:       (role: UserRole) => role !== 'USER',
   seeAdminDashboard:(role: UserRole) => role === 'SUPERADMIN',
   manageUsers:      (role: UserRole) => role === 'SUPERADMIN',
+  resolveComment:   (role: UserRole) => role !== 'USER',
   comment:          (_role: UserRole) => true,
 };
 

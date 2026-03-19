@@ -25,21 +25,34 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
   const [showCommentPopup, setShowCommentPopup] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
+  const [replies, setReplies] = useState<Record<number, Comment[]>>({});
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [pendingReplyParentId, setPendingReplyParentId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [isDarkPreview, setIsDarkPreview] = useState(false);
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
   const [nameTag, setNameTag] = useState("");
   const [savingTag, setSavingTag] = useState(false);
+  const [resolveToast, setResolveToast] = useState(false);
 
   const canDelete = can.delete(role);
   const canAssignStatus = can.assignStatusTag(role);
   const canAssignNameTag = can.assignNameTag(role);
+  const canResolve = can.resolveComment(role);
 
   useEffect(() => {
     if (illustration) {
-      const storedUser = localStorage.getItem("graphicsLabCommentUser");
-      if (storedUser) setUserInfo(JSON.parse(storedUser));
+      if (role !== 'USER') {
+        // Admin — use their session directly, no identity popup needed
+        const adminRaw = localStorage.getItem("graphicsLabAdminSession");
+        if (adminRaw) {
+          const { name, email } = JSON.parse(adminRaw);
+          setUserInfo({ name: name ?? email, email, team: role });
+        }
+      } else {
+        const storedUser = localStorage.getItem("graphicsLabCommentUser");
+        if (storedUser) setUserInfo(JSON.parse(storedUser));
+      }
 
       const storedBookmarks = localStorage.getItem("graphicsLabBookmarks");
       if (storedBookmarks) {
@@ -72,13 +85,40 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
       .from('comments')
       .select('*')
       .eq('illustration_id', illustration.id)
-      .order('timestamp', { ascending: false });
+      .order('timestamp', { ascending: true });
 
     if (error) {
       console.error("Error fetching comments:", error);
     } else if (data) {
-      setComments(data);
+      const topLevel = data.filter((c: Comment) => !c.parent_id);
+      const nested: Record<number, Comment[]> = {};
+      data.filter((c: Comment) => c.parent_id).forEach((c: Comment) => {
+        if (!nested[c.parent_id!]) nested[c.parent_id!] = [];
+        nested[c.parent_id!].push(c);
+      });
+      setComments(topLevel);
+      setReplies(nested);
     }
+  };
+
+  const handleReply = async (parentId: number, text: string) => {
+    if (!userInfo || !illustration) return;
+    const { error } = await supabase.from('comments').insert([{
+      illustration_id: illustration.id,
+      user_name: userInfo.name,
+      user_email: userInfo.email,
+      user_team: userInfo.team,
+      text,
+      timestamp: Date.now(),
+      parent_id: parentId,
+    }]);
+    if (error) { alert(`Reply error: ${error.message}`); return; }
+    await fetchComments();
+  };
+
+  const handleReplyAuthNeeded = (parentId: number) => {
+    setPendingReplyParentId(parentId);
+    setShowAuthPopup(true);
   };
 
   if (!illustration) return null;
@@ -177,7 +217,13 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
     setUserInfo(data);
     localStorage.setItem("graphicsLabCommentUser", JSON.stringify(data));
     setShowAuthPopup(false);
-    setShowCommentPopup(true);
+    if (pendingReplyParentId !== null) {
+      setPendingReplyParentId(null);
+      // Reply form will now open since userInfo is set — trigger via replyingToId in CommentsList
+      // We just need to re-open the reply inline; CommentsList handles it from userInfo being set
+    } else {
+      setShowCommentPopup(true);
+    }
   };
 
   const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -235,6 +281,22 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
     }
   };
 
+  const handleResolveComment = async (id: number, resolved: boolean) => {
+    setComments(prev => prev.map(c => c.id === id ? { ...c, resolved } : c));
+
+    const { error } = await supabase.from('comments').update({ resolved }).eq('id', id);
+    if (error) {
+      setComments(prev => prev.map(c => c.id === id ? { ...c, resolved: !resolved } : c));
+      alert(`Could not update comment. Make sure you've run:\n\nalter table comments add column if not exists resolved boolean default false;\n\nError: ${error.message}`);
+      return;
+    }
+
+    if (resolved) {
+      setResolveToast(true);
+      setTimeout(() => setResolveToast(false), 3000);
+    }
+  };
+
   const handleEditComment = (comment: Comment) => {
     setEditingCommentId(comment.id);
     setCommentText(comment.text);
@@ -252,6 +314,14 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
     <>
       {/* Backdrop */}
       <div onClick={onClose} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 3000, backdropFilter: "blur(4px)", transition: "opacity 0.3s ease" }} />
+
+      {/* Resolve toast */}
+      {resolveToast && (
+        <div style={{ position: "fixed", bottom: "32px", left: "50%", transform: "translateX(-50%)", zIndex: 4500, display: "flex", alignItems: "center", gap: "8px", backgroundColor: "#16a34a", color: "#fff", padding: "12px 20px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, boxShadow: "0 8px 24px rgba(22,163,74,0.35)", animation: "fadeInUp 0.25s ease-out" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Comment resolved
+        </div>
+      )}
 
       {/* Side Panel */}
       <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "100%", maxWidth: "450px", backgroundColor: "var(--background)", zIndex: 3100, boxShadow: "-10px 0 30px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", overflowY: "auto", animation: "slideIn 0.3s ease-out" }}>
@@ -386,10 +456,16 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
 
           <CommentsList
             comments={comments}
+            replies={replies}
             successMessage={successMessage}
+            userInfo={userInfo}
             onAddComment={handleAddCommentClick}
             onEdit={handleEditComment}
             onDelete={handleDeleteComment}
+            onReply={handleReply}
+            onReplyAuthNeeded={handleReplyAuthNeeded}
+            canResolve={canResolve}
+            onResolve={handleResolveComment}
           />
         </div>
       </div>
@@ -409,6 +485,10 @@ export default function IllustrationSidePanel({ illustration, onClose, onDelete,
         @keyframes slideIn {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
       `}</style>
     </>

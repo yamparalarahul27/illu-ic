@@ -118,7 +118,7 @@ export default function Navbar() {
             GRAPHICS LAB
           </span>
           {/* Role badge for admins */}
-          {mounted && session.isLoaded && session.mode === "admin" && roleCfg && (
+          {isAdminMode && roleCfg && (
             <span style={{
               padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: 700,
               backgroundColor: roleCfg.bg, color: roleCfg.color, letterSpacing: "0.04em",

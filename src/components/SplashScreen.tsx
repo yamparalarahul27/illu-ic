@@ -10,18 +10,17 @@ export default function SplashScreen() {
   const [isRendered, setIsRendered] = useState(true);
 
   useEffect(() => {
+    // Returning session → skip the splash entirely and go straight to dashboard
+    const adminSession = localStorage.getItem('graphicsLabAdminSession');
+    const userMode = localStorage.getItem('graphicsLabUserMode');
+    if (adminSession || userMode) {
+      router.replace('/dashboard');
+      return;
+    }
+
+    // New visitor — show the full splash animation
     const logoIn = setTimeout(() => setLogoVisible(true), 100);
-
-    const done = setTimeout(() => {
-      // Returning admin → go straight to dashboard
-      const adminSession = localStorage.getItem('graphicsLabAdminSession');
-      const userMode = localStorage.getItem('graphicsLabUserMode');
-      if (adminSession || userMode) {
-        router.push('/dashboard');
-      }
-      setIsRendered(false);
-    }, 2200);
-
+    const done = setTimeout(() => setIsRendered(false), 2200);
     return () => { clearTimeout(logoIn); clearTimeout(done); };
   }, [router]);
 

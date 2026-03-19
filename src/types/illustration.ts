@@ -19,4 +19,6 @@ export interface Comment {
   user_team: string;
   text: string;
   timestamp: number;
+  parent_id?: number | null;
+  resolved?: boolean;
 }

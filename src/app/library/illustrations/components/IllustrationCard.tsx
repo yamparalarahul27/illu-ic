@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Illustration } from "@/types/illustration";
 import { STATUS_CONFIG, AssetStatus } from "@/lib/permissions";
+import { formatIllustrationName } from "@/lib/formatName";
 
 interface IllustrationCardProps {
   illustration: Illustration;
@@ -10,10 +11,15 @@ interface IllustrationCardProps {
   isSelected?: boolean;
   isSelectionMode?: boolean;
   commentCount?: number;
+  isDarkView?: boolean;
 }
 
-export default function IllustrationCard({ illustration, onClick, isSelected, isSelectionMode, commentCount = 0 }: IllustrationCardProps) {
+export default function IllustrationCard({ illustration, onClick, isSelected, isSelectionMode, commentCount = 0, isDarkView = false }: IllustrationCardProps) {
   const statusCfg = illustration.status ? STATUS_CONFIG[illustration.status as AssetStatus] : null;
+  const displayName = formatIllustrationName(illustration.name, isDarkView);
+  const imageSrc = isDarkView && illustration.dark_image_url
+    ? illustration.dark_image_url
+    : (illustration.image_url || illustration.image);
 
   return (
     <div
@@ -51,10 +57,10 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
       )}
 
       {/* Image */}
-      <div style={{ position: "relative", flex: 1, backgroundColor: "var(--input-bg)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+      <div style={{ position: "relative", flex: 1, backgroundColor: isDarkView ? "#1f2937" : "var(--input-bg)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", transition: "background-color 0.3s ease" }}>
         <Image
-          src={illustration.image_url || illustration.image}
-          alt={illustration.name}
+          src={imageSrc}
+          alt={displayName}
           fill
           style={{ objectFit: "contain", padding: "24px", transition: "transform 0.3s ease" }}
           className="illustration-img"
@@ -64,15 +70,10 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
       {/* Footer */}
       <div style={{ padding: "12px 16px", backgroundColor: "var(--card-bg)", borderTop: "1px solid var(--border-color)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
         <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
-          {illustration.name}
+          {displayName}
         </h3>
-        {/* Status badge */}
         {statusCfg && (
-          <span style={{
-            flexShrink: 0, padding: "2px 8px", borderRadius: "20px", fontSize: "10px",
-            fontWeight: 700, backgroundColor: statusCfg.bg, color: statusCfg.color,
-            whiteSpace: "nowrap", letterSpacing: "0.03em",
-          }}>
+          <span style={{ flexShrink: 0, padding: "2px 8px", borderRadius: "20px", fontSize: "10px", fontWeight: 700, backgroundColor: statusCfg.bg, color: statusCfg.color, whiteSpace: "nowrap", letterSpacing: "0.03em" }}>
             {statusCfg.label}
           </span>
         )}

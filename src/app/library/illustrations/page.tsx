@@ -29,6 +29,9 @@ export default function IllustrationsLibrary() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
 
+  // Light / Dark view toggle
+  const [isDarkView, setIsDarkView] = useState(false);
+
   // Filter sidebar
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("newest");
@@ -205,6 +208,8 @@ export default function IllustrationsLibrary() {
         onSearchChange={setSearchQuery}
         onFilterClick={() => setFilterSidebarOpen(true)}
         isFilterActive={isFilterActive}
+        isDarkView={isDarkView}
+        onToggleDarkView={() => setIsDarkView(v => !v)}
         onUploadClick={upload.openModal}
         isSelectionMode={isSelectionMode}
         onToggleSelectionMode={() => { setIsSelectionMode(!isSelectionMode); setSelectedIds(new Set()); }}
@@ -227,6 +232,7 @@ export default function IllustrationsLibrary() {
               isSelected={selectedIds.has(illustration.id)}
               isSelectionMode={isSelectionMode}
               commentCount={commentCounts[illustration.id] || 0}
+              isDarkView={isDarkView}
             />
           ))
         ) : (

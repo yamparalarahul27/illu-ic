@@ -8,6 +8,8 @@ interface SearchControlBarProps {
   onSearchChange: (query: string) => void;
   onFilterClick: () => void;
   isFilterActive: boolean;
+  isDarkView: boolean;
+  onToggleDarkView: () => void;
   onUploadClick: () => void;
   isSelectionMode: boolean;
   onToggleSelectionMode: () => void;
@@ -17,8 +19,8 @@ interface SearchControlBarProps {
 }
 
 export default function SearchControlBar({
-  searchQuery, onSearchChange, onFilterClick, isFilterActive, onUploadClick,
-  isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete, role,
+  searchQuery, onSearchChange, onFilterClick, isFilterActive, isDarkView, onToggleDarkView,
+  onUploadClick, isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete, role,
 }: SearchControlBarProps) {
   const canUpload = can.upload(role);
   const canDelete = can.delete(role);
@@ -57,6 +59,25 @@ export default function SearchControlBar({
         </div>
       ) : (
         <div style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
+          {/* Light / Dark view toggle */}
+          <button
+            onClick={onToggleDarkView}
+            title={isDarkView ? "Switch to Light view" : "Switch to Dark view"}
+            style={{ display: "flex", alignItems: "center", gap: "6px", height: "48px", padding: "0 16px", borderRadius: "24px", border: `1px solid ${isDarkView ? "#6b7280" : "var(--border-color)"}`, backgroundColor: isDarkView ? "#1f2937" : "var(--input-bg)", color: isDarkView ? "#f9fafb" : "var(--text-secondary)", fontWeight: 600, fontSize: "13px", cursor: "pointer", transition: "all 0.2s ease", flexShrink: 0 }}
+          >
+            {isDarkView ? (
+              <>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                Dark
+              </>
+            ) : (
+              <>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                Light
+              </>
+            )}
+          </button>
+
           {/* Filter — visible to all */}
           <button
             onClick={onFilterClick}

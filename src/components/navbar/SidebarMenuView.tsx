@@ -70,7 +70,7 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isDar
           {isAdminMode ? (
             <div onClick={onLogout} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#fee2e2", color: "#ef4444", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fecaca"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fee2e2"}>Log out</div>
           ) : (
-            <div onClick={onLogin} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#ede9fe", color: "#7c3aed", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#ddd6fe"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ede9fe"}>Log in</div>
+            <div onClick={onLogin} style={{ padding: "16px", borderRadius: "12px", backgroundColor: "#dcfce7", color: "#16a34a", cursor: "pointer", fontWeight: 600, textAlign: "center", transition: "background 0.2s ease" }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#bbf7d0"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#dcfce7"}>Log in</div>
           )}
         </div>
       </div>
