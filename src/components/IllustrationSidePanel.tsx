@@ -392,7 +392,7 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
 
         {/* Content */}
         <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
-          <IllustrationPreview illustration={illustration} isDarkPreview={isDarkPreview} onTogglePreview={setIsDarkPreview} />
+          <IllustrationPreview illustration={illustration} isDarkPreview={isDarkPreview} onTogglePreview={setIsDarkPreview} pngSize={selectedSize} />
 
           {/* Dev name badge + copy */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
