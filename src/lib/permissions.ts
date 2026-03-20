@@ -17,13 +17,14 @@ export const can = {
   comment:          (_role: UserRole) => true,
 };
 
-export type AssetStatus = 'CONFIRMED' | 'IN_PROGRESS' | 'UNDER_REVIEW' | 'REMOVED';
+export type AssetStatus = 'CONFIRMED' | 'IN_PROGRESS' | 'UNDER_REVIEW' | 'REMOVED' | 'WIP';
 
 export const STATUS_CONFIG: Record<AssetStatus, { label: string; color: string; bg: string }> = {
   CONFIRMED:    { label: 'Confirmed',    color: '#16a34a', bg: '#dcfce7' },
   IN_PROGRESS:  { label: 'In Progress',  color: '#2563eb', bg: '#dbeafe' },
   UNDER_REVIEW: { label: 'Under Review', color: '#d97706', bg: '#fef3c7' },
   REMOVED:      { label: 'Removed',      color: '#db2777', bg: '#fce7f3' },
+  WIP:          { label: 'WIP',          color: '#7c3aed', bg: '#ede9fe' },
 };
 
 export const NAME_TAGS = ['Auth', 'Home', 'Trading', 'Market', 'Wallet'] as const;

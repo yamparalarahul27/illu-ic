@@ -15,6 +15,7 @@ import FilterSidebar, { SortBy, ViewFilters } from "./components/FilterSidebar";
 import QuickFilterBar from "@/components/QuickFilterBar";
 import { useSession } from "@/hooks/useSession";
 import { can, NAME_TAGS } from "@/lib/permissions";
+import RequestAssetModal from "@/components/RequestAssetModal";
 
 const DEFAULT_VIEW_FILTERS: ViewFilters = {
   confirmed: false, inProgress: false, underReview: false,
@@ -47,6 +48,7 @@ export default function IllustrationsLibrary() {
 
   // Category filter from search bar dropdown
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [showRequestModal, setShowRequestModal] = useState(false);
 
   // Filter sidebar
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
@@ -304,9 +306,18 @@ export default function IllustrationsLibrary() {
         const hasAny = sections.length > 0 || untagged.length > 0;
 
         if (!hasAny) return (
-          <div style={{ textAlign: "center", padding: "64px 0", color: "var(--text-secondary)" }}>
-            <p style={{ fontSize: "18px", fontWeight: 500 }}>No illustrations found.</p>
-            <p style={{ marginTop: "8px" }}>Try adjusting your filters or search query.</p>
+          <div style={{ textAlign: "center", padding: "64px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+            <img src="/ill_fallback.svg" alt="Not found" style={{ width: "180px", height: "auto", opacity: 0.85 }} />
+            <p style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Uh Oh! Asset not found</p>
+            <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: 0 }}>Try adjusting your search or filters.</p>
+            <button
+              onClick={() => setShowRequestModal(true)}
+              style={{ marginTop: "8px", padding: "12px 24px", borderRadius: "12px", backgroundColor: "#7c3aed", color: "#fff", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#6d28d9"}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = "#7c3aed"}
+            >
+              Request Asset
+            </button>
           </div>
         );
 
@@ -353,6 +364,13 @@ export default function IllustrationsLibrary() {
           </div>
         );
       })()}
+
+      {showRequestModal && (
+        <RequestAssetModal
+          prefillName={searchQuery}
+          onClose={() => setShowRequestModal(false)}
+        />
+      )}
 
       <style dangerouslySetInnerHTML={{__html: `
         .illustration-card:hover {

@@ -6,7 +6,9 @@ import { useState } from "react";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import WelcomeBanner from "./components/WelcomeBanner";
 import DashboardCard from "./components/DashboardCard";
+import AssetRequestsPanel from "./components/AssetRequestsPanel";
 import { useSession } from "@/hooks/useSession";
+import { can } from "@/lib/permissions";
 
 function DashboardContent() {
   const router = useRouter();
@@ -15,6 +17,7 @@ function DashboardContent() {
 
   const displayName = session.isLoaded ? session.name : "";
   const greetingPrefix = displayName ? `Hi ${displayName}! Welcome to ` : `Hi! Welcome to `;
+  const showRequests = session.isLoaded && can.seeAdminUI(session.role);
 
   const handleNavigation = (href: string) => {
     setIsLoading(true);
@@ -43,6 +46,13 @@ function DashboardContent() {
         <DashboardCard title="Branding" backgroundGradient="radial-gradient(circle at center, #7c3aed 10%, transparent 80%)" />
         <DashboardCard title="Brand Guidelines" backgroundGradient="radial-gradient(circle at center, #ec4899 10%, transparent 80%)" />
       </div>
+
+      {showRequests && (
+        <div style={{ marginTop: "48px" }}>
+          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 20px" }}>Asset Requests</h2>
+          <AssetRequestsPanel />
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{__html: `
         .dashboard-card:hover { transform: translateY(-8px); }

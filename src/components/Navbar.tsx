@@ -7,6 +7,7 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 import SidebarMenuView from "./navbar/SidebarMenuView";
 import SidebarProfileView from "./navbar/SidebarProfileView";
 import SidebarMediaView from "./navbar/SidebarMediaView";
+import SidebarLatestAssetsView from "./navbar/SidebarLatestAssetsView";
 import { useSession, clearAdminSession, clearUserSession, notifySessionChange } from "@/hooks/useSession";
 import { can, ROLE_CONFIG } from "@/lib/permissions";
 
@@ -15,7 +16,7 @@ export default function Navbar() {
   const session = useSession();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads">("menu");
+  const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads" | "latest">("menu");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -233,6 +234,11 @@ export default function Navbar() {
             onToggleEditEmail={() => setIsEditingEmail(!isEditingEmail)}
             onToggleEditTeam={() => setIsEditingTeam(!isEditingTeam)}
             onUpdateProfile={handleUpdateProfile}
+            onBack={() => setSidebarView("menu")}
+          />
+        ) : sidebarView === "latest" ? (
+          <SidebarLatestAssetsView
+            isDarkMode={isDarkMode}
             onBack={() => setSidebarView("menu")}
           />
         ) : (

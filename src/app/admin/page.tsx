@@ -8,8 +8,9 @@ import {
   addAdminDirectly, updateAdminRole, toggleAdminStatus,
 } from "@/lib/admin";
 import { ADMIN_ROLES, UserRole, ROLE_CONFIG } from "@/lib/permissions";
+import AssetRequestsPanel from "@/app/dashboard/components/AssetRequestsPanel";
 
-type Tab = "users" | "requests" | "add";
+type Tab = "users" | "requests" | "add" | "asset-requests";
 
 interface AdminUser { id: string; email: string; name: string; role: string; status: string; created_at: string; }
 interface AdminRequest { id: number; name: string; email: string; team: string; reason: string; status: string; created_at: string; }
@@ -144,7 +145,7 @@ export default function AdminDashboard() {
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "4px", marginBottom: "28px", backgroundColor: "var(--input-bg)", padding: "4px", borderRadius: "14px", width: "fit-content" }}>
-        {([["users", "Users"], ["requests", "Requests"], ["add", "Add Admin"]] as [Tab, string][]).map(([key, label]) => (
+        {([["users", "Users"], ["requests", "Requests"], ["asset-requests", "Asset Requests"], ["add", "Add Admin"]] as [Tab, string][]).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: "8px 20px", borderRadius: "10px", border: "none", fontWeight: 600,
             fontSize: "14px", cursor: "pointer", transition: "all 0.2s ease",
@@ -256,6 +257,9 @@ export default function AdminDashboard() {
           )}
         </div>
       )}
+
+      {/* ── ASSET REQUESTS TAB ── */}
+      {tab === "asset-requests" && <AssetRequestsPanel />}
 
       {/* ── ADD ADMIN TAB ── */}
       {tab === "add" && (

@@ -2,7 +2,7 @@
 
 interface SidebarMenuViewProps {
   onClose: () => void;
-  onNavigate: (view: "profile" | "saved" | "downloads") => void;
+  onNavigate: (view: "profile" | "saved" | "downloads" | "latest") => void;
   onSyncData: () => void;
   isAdmin?: boolean;
   onNavigateToAdmin?: () => void;
@@ -26,10 +26,10 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isAdm
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
         <div onClick={() => onNavigate("profile")} style={menuItemStyle}>Profile</div>
-        
+
         {isAdmin && onNavigateToAdmin && (
-          <div 
-            onClick={() => { onClose(); onNavigateToAdmin(); }} 
+          <div
+            onClick={() => { onClose(); onNavigateToAdmin(); }}
             style={{ ...menuItemStyle, backgroundColor: "#ede9fe", color: "#7c3aed", fontWeight: 700 }}
           >
             <span style={{ marginRight: "8px" }}>🔑</span> Admin Dashboard
@@ -38,6 +38,7 @@ export default function SidebarMenuView({ onClose, onNavigate, onSyncData, isAdm
 
         <div onClick={() => { onSyncData(); onNavigate("saved"); }} style={menuItemStyle}>Saved Media</div>
         <div onClick={() => { onSyncData(); onNavigate("downloads"); }} style={menuItemStyle}>Downloads</div>
+        <div onClick={() => onNavigate("latest")} style={menuItemStyle}>Latest Assets</div>
 
         <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "12px" }}>
           {isAdminMode ? (
