@@ -207,6 +207,21 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
               </button>
             </div>
 
+            {/* Size preview */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "220px", backgroundColor: isDarkView ? "#1f2937" : "var(--input-bg)", borderRadius: "14px", overflow: "hidden" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageSrc}
+                alt={displayName}
+                style={{
+                  width: `${72 * parseInt(pngSize)}px`,
+                  height: `${72 * parseInt(pngSize)}px`,
+                  objectFit: "contain",
+                  transition: "width 0.25s ease, height 0.25s ease",
+                }}
+              />
+            </div>
+
             {/* SVG options */}
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <button
