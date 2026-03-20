@@ -139,9 +139,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
             <button
               onClick={e => { e.stopPropagation(); onEditClick(icon); }}
               title="Edit asset"
-              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", transition: "background-color 0.2s ease" }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkView ? "#1f2937" : "#ffffff"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)"}
+              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", background: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDarkView ? "#e5e7eb" : "#374151"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -155,9 +153,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
             <button
               onClick={handleDownloadClick}
               title="Download"
-              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", transition: "background-color 0.2s ease" }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkView ? "#1f2937" : "#ffffff"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)"}
+              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", background: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isDarkView ? "#e5e7eb" : "#374151"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
