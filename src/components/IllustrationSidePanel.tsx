@@ -50,6 +50,7 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
   const canResolve = can.resolveComment(role);
 
   useEffect(() => { setIsDarkPreview(isDarkView); }, [isDarkView]);
+  useEffect(() => { setSelectedSize("1x"); }, [illustration?.id]);
 
   useEffect(() => {
     if (illustration) {
