@@ -44,10 +44,19 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
         const res = await fetch(imageSrc);
         svgText = await res.text();
       }
-      await navigator.clipboard.writeText(svgText);
+      // Fallback textarea method — works even after async awaits
+      const ta = document.createElement("textarea");
+      ta.value = svgText;
+      ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
       setSvgCopied(true);
       setTimeout(() => setSvgCopied(false), 2000);
-    } catch {
+    } catch (err) {
+      console.error("Copy SVG failed:", err);
       alert("Failed to copy SVG. Please try again.");
     }
   };
