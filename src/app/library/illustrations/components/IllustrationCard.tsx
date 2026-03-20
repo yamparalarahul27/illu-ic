@@ -35,13 +35,20 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
     setShowDownloadPopup(true);
   };
 
-  const handleCopySVG = () => {
-    if (illustration.image && illustration.image.startsWith("data:image/svg+xml")) {
-      const svgContent = atob(illustration.image.split(",")[1]);
-      navigator.clipboard.writeText(svgContent).then(() => {
-        setSvgCopied(true);
-        setTimeout(() => setSvgCopied(false), 2000);
-      });
+  const handleCopySVG = async () => {
+    try {
+      let svgText: string;
+      if (imageSrc.startsWith("data:image/svg+xml")) {
+        svgText = atob(imageSrc.split(",")[1]);
+      } else {
+        const res = await fetch(imageSrc);
+        svgText = await res.text();
+      }
+      await navigator.clipboard.writeText(svgText);
+      setSvgCopied(true);
+      setTimeout(() => setSvgCopied(false), 2000);
+    } catch {
+      alert("Failed to copy SVG. Please try again.");
     }
   };
 
