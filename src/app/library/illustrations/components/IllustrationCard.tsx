@@ -135,7 +135,7 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             src={imageSrc}
             alt={displayName}
             fill
-            style={{ objectFit: "contain", padding: "24px", transition: "transform 0.3s ease" }}
+            style={{ objectFit: "contain", padding: "16px", transition: "transform 0.3s ease" }}
             className="illustration-img"
           />
 

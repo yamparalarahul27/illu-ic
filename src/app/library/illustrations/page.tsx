@@ -302,7 +302,7 @@ export default function IllustrationsLibrary() {
           </div>
         );
 
-        const colWidth = cardSize === "small" ? "160px" : cardSize === "large" ? "340px" : "240px";
+        const colWidth = cardSize === "small" ? "120px" : cardSize === "large" ? "260px" : "180px";
         const renderGrid = (items: typeof filteredIllustrations) => (
           <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(${colWidth}, 1fr))`, gap: "24px" }}>
             {items.map(illustration => (

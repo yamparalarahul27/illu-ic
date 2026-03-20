@@ -113,7 +113,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
             src={imageSrc}
             alt={displayName}
             fill
-            style={{ objectFit: "contain", padding: "24px", transition: "transform 0.3s ease" }}
+            style={{ objectFit: "contain", padding: "16px", transition: "transform 0.3s ease" }}
             className="illustration-img"
           />
 
