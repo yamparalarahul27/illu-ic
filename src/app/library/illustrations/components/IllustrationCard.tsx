@@ -199,7 +199,7 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ backgroundColor: "var(--background)", borderRadius: "20px", padding: "28px", width: "320px", boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: "16px" }}
+            style={{ backgroundColor: "var(--background)", borderRadius: "20px", padding: "28px", width: "320px", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)", display: "flex", flexDirection: "column", gap: "16px" }}
           >
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -215,14 +215,14 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             </div>
 
             {/* Size preview */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "220px", backgroundColor: isDarkView ? "#1f2937" : "var(--input-bg)", borderRadius: "14px", overflow: "hidden" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "160px", backgroundColor: isDarkView ? "#1f2937" : "var(--input-bg)", borderRadius: "14px", overflow: "hidden" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageSrc}
                 alt={displayName}
                 style={{
-                  width: `${72 * parseInt(pngSize)}px`,
-                  height: `${72 * parseInt(pngSize)}px`,
+                  width: `${48 * parseInt(pngSize)}px`,
+                  height: `${48 * parseInt(pngSize)}px`,
                   objectFit: "contain",
                   transition: "width 0.25s ease, height 0.25s ease",
                 }}
