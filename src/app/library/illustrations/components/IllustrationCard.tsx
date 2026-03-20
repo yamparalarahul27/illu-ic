@@ -162,7 +162,7 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             <button
               onClick={e => { e.stopPropagation(); onEditClick(illustration); }}
               title="Edit asset"
-              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", background: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+              style={{ position: "absolute", top: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", background: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isDarkView ? "#e5e7eb" : "#374151"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -176,7 +176,7 @@ export default function IllustrationCard({ illustration, onClick, isSelected, is
             <button
               onClick={handleDownloadClick}
               title="Download"
-              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", background: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+              style={{ position: "absolute", top: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", background: "none", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isDarkView ? "#e5e7eb" : "#374151"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
