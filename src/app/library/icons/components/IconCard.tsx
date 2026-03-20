@@ -139,7 +139,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
             <button
               onClick={e => { e.stopPropagation(); onEditClick(icon); }}
               title="Edit asset"
-              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)", transition: "background-color 0.2s ease" }}
+              style={{ position: "absolute", bottom: "10px", left: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", transition: "background-color 0.2s ease" }}
               onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkView ? "#1f2937" : "#ffffff"}
               onMouseLeave={e => e.currentTarget.style.backgroundColor = isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)"}
             >
@@ -155,7 +155,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
             <button
               onClick={handleDownloadClick}
               title="Download"
-              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3)", transition: "background-color 0.2s ease" }}
+              style={{ position: "absolute", bottom: "10px", right: "10px", zIndex: 10, width: "32px", height: "32px", borderRadius: "8px", backgroundColor: isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", transition: "background-color 0.2s ease" }}
               onMouseEnter={e => e.currentTarget.style.backgroundColor = isDarkView ? "#1f2937" : "#ffffff"}
               onMouseLeave={e => e.currentTarget.style.backgroundColor = isDarkView ? "rgba(31,41,55,0.9)" : "rgba(255,255,255,0.9)"}
             >
