@@ -10,7 +10,7 @@ interface IllustrationPreviewProps {
 }
 
 export default function IllustrationPreview({ illustration, isDarkPreview, onTogglePreview, pngSize = "1x" }: IllustrationPreviewProps) {
-  const sizeMap = { "1x": "22%", "2x": "52%", "3x": "84%" };
+  const sizeMap = { "1x": "25%", "2x": "50%", "3x": "74%" };
   return (
     <div style={{ position: "relative", width: "100%", aspectRatio: "4/3", backgroundColor: isDarkPreview ? "#1e1b4b" : "var(--card-bg)", borderRadius: "16px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border-color)", transition: "background-color 0.3s ease" }}>
       {illustration.dark_image_url && (
