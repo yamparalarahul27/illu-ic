@@ -43,6 +43,7 @@ export default function IconsLibrary() {
   }, []);
 
   const [cardSize, setCardSize] = useState<CardSize>("normal");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("newest");
   const [viewFilters, setViewFilters] = useState<ViewFilters>(DEFAULT_VIEW_FILTERS);
@@ -121,6 +122,8 @@ export default function IconsLibrary() {
       const nameTag = (item.name_tag || "").toLowerCase();
       const query = searchQuery.toLowerCase();
       if (!name.includes(query) && !nameTag.includes(query)) return false;
+
+      if (selectedTag !== null && item.name_tag !== selectedTag) return false;
 
       const anyViewActive = Object.values(viewFilters).some(Boolean);
       if (!anyViewActive) return true;
@@ -275,6 +278,9 @@ export default function IconsLibrary() {
         cardSize={cardSize}
         onCardSizeChange={setCardSize}
         searchPlaceholder="Search icons..."
+        availableTags={availableTags}
+        selectedTag={selectedTag}
+        onTagChange={setSelectedTag}
       />
 
       <QuickFilterBar

@@ -45,6 +45,9 @@ export default function IllustrationsLibrary() {
   // Card size
   const [cardSize, setCardSize] = useState<CardSize>("normal");
 
+  // Category filter from search bar dropdown
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
   // Filter sidebar
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("newest");
@@ -126,6 +129,8 @@ export default function IllustrationsLibrary() {
       const nameTag = (item.name_tag || "").toLowerCase();
       const query = searchQuery.toLowerCase();
       if (!name.includes(query) && !nameTag.includes(query)) return false;
+
+      if (selectedTag !== null && item.name_tag !== selectedTag) return false;
 
       const anyViewActive = Object.values(viewFilters).some(Boolean);
       if (!anyViewActive) return true;
@@ -276,6 +281,9 @@ export default function IllustrationsLibrary() {
         role={role}
         cardSize={cardSize}
         onCardSizeChange={setCardSize}
+        availableTags={availableTags}
+        selectedTag={selectedTag}
+        onTagChange={setSelectedTag}
       />
 
       <QuickFilterBar

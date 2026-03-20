@@ -75,16 +75,21 @@ interface SearchControlBarProps {
   cardSize: CardSize;
   onCardSizeChange: (size: CardSize) => void;
   searchPlaceholder?: string;
+  availableTags?: string[];
+  selectedTag?: string | null;
+  onTagChange?: (tag: string | null) => void;
 }
 
 export default function SearchControlBar({
   searchQuery, onSearchChange, onFilterClick, isFilterActive,
   onUploadClick, isSelectionMode, onToggleSelectionMode, selectedIdsCount, onBulkDelete, role,
   cardSize, onCardSizeChange, searchPlaceholder = "Search illustrations...",
+  availableTags = [], selectedTag = null, onTagChange,
 }: SearchControlBarProps) {
   const canUpload = can.upload(role);
   const canDelete = can.delete(role);
   const isAdmin = can.seeAdminUI(role);
+  const [tagDropdownOpen, setTagDropdownOpen] = useState(false);
 
   return (
     <div style={{ position: "sticky", top: "60px", zIndex: 1000, backgroundColor: "var(--background)", padding: "24px 0", display: "flex", alignItems: "center", gap: "16px" }}>
@@ -96,19 +101,63 @@ export default function SearchControlBar({
       </Link>
 
       {/* Search */}
-      <div style={{ position: "relative", flex: 1, height: "48px" }}>
-        <div style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)", pointerEvents: "none" }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
+      <div style={{ position: "relative", flex: 1, height: "48px", display: "flex", alignItems: "center", border: "1px solid var(--border-color)", borderRadius: "24px", backgroundColor: "var(--input-bg)", overflow: "visible" }}>
+
+        {/* Category dropdown */}
+        {availableTags.length > 0 && onTagChange && (
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              onClick={() => setTagDropdownOpen(o => !o)}
+              style={{ display: "flex", alignItems: "center", gap: "6px", height: "48px", padding: "0 14px 0 16px", background: "none", border: "none", borderRight: "1px solid var(--border-color)", cursor: "pointer", color: "var(--text-primary)", fontSize: "13px", fontWeight: 600, whiteSpace: "nowrap", borderRadius: "24px 0 0 24px" }}
+            >
+              <span style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {selectedTag ?? "All"}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.15s", transform: tagDropdownOpen ? "rotate(180deg)" : "none", flexShrink: 0 }}>
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            {tagDropdownOpen && (
+              <>
+                <div onClick={() => setTagDropdownOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 1099 }} />
+                <div style={{ position: "absolute", top: "54px", left: 0, zIndex: 1100, backgroundColor: "var(--background)", borderRadius: "16px", padding: "6px", minWidth: "220px", maxHeight: "320px", overflowY: "auto", boxShadow: "0 12px 40px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08)" }}>
+                  {/* All option */}
+                  <button
+                    onClick={() => { onTagChange(null); setTagDropdownOpen(false); }}
+                    style={{ width: "100%", padding: "9px 14px", borderRadius: "10px", border: "none", background: selectedTag === null ? "#ede9fe" : "transparent", color: selectedTag === null ? "#7c3aed" : "var(--text-primary)", fontSize: "13px", fontWeight: selectedTag === null ? 700 : 500, textAlign: "left", cursor: "pointer", transition: "background 0.12s" }}
+                  >
+                    All
+                  </button>
+                  {availableTags.map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => { onTagChange(tag); setTagDropdownOpen(false); }}
+                      style={{ width: "100%", padding: "9px 14px", borderRadius: "10px", border: "none", background: selectedTag === tag ? "#ede9fe" : "transparent", color: selectedTag === tag ? "#7c3aed" : "var(--text-primary)", fontSize: "13px", fontWeight: selectedTag === tag ? 700 : 500, textAlign: "left", cursor: "pointer", transition: "background 0.12s" }}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", flex: 1, position: "relative" }}>
+          <div style={{ position: "absolute", left: "14px", color: "var(--text-secondary)", pointerEvents: "none", display: "flex" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            style={{ width: "100%", height: "48px", padding: "0 16px 0 42px", background: "none", border: "none", color: "var(--text-primary)", fontSize: "15px", outline: "none" }}
+          />
         </div>
-        <input
-          type="text"
-          placeholder={searchPlaceholder}
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          style={{ width: "100%", height: "100%", padding: "0 16px 0 48px", borderRadius: "24px", border: "1px solid var(--border-color)", backgroundColor: "var(--input-bg)", color: "var(--text-primary)", fontSize: "16px", outline: "none" }}
-        />
       </div>
 
       {isSelectionMode ? (
