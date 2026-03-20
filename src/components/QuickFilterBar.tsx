@@ -8,10 +8,10 @@ interface QuickFilterBarProps {
   visible: boolean;
 }
 
-const CHIPS: { key: keyof ViewFilters; label: string; color: string; bg: string; activeBg: string }[] = [
-  { key: "confirmed",   label: "Confirmed",    color: "#15803d", bg: "#f0fdf4", activeBg: "#16a34a" },
-  { key: "inProgress",  label: "In Progress",  color: "#1d4ed8", bg: "#eff6ff", activeBg: "#2563eb" },
-  { key: "underReview", label: "Under Review", color: "#92400e", bg: "#fffbeb", activeBg: "#d97706" },
+const CHIPS: { key: keyof ViewFilters; label: string; color: string; activeBg: string }[] = [
+  { key: "confirmed",   label: "Confirmed",    color: "#15803d", activeBg: "#16a34a" },
+  { key: "inProgress",  label: "In Progress",  color: "#1d4ed8", activeBg: "#2563eb" },
+  { key: "underReview", label: "Under Review", color: "#92400e", activeBg: "#d97706" },
 ];
 
 export default function QuickFilterBar({ viewFilters, onChange, visible }: QuickFilterBarProps) {
@@ -22,21 +22,16 @@ export default function QuickFilterBar({ viewFilters, onChange, visible }: Quick
 
   return (
     <div style={{
-      position: "sticky",
-      top: "60px",
-      zIndex: 1500,
       display: "flex",
       alignItems: "center",
       gap: "8px",
       padding: "8px 0 10px",
-      backgroundColor: "var(--background)",
-      borderBottom: "1px solid var(--border-color)",
       marginBottom: "8px",
     }}>
       <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
         Filter
       </span>
-      {CHIPS.map(({ key, label, color, bg, activeBg }) => {
+      {CHIPS.map(({ key, label, color, activeBg }) => {
         const active = viewFilters[key];
         return (
           <button
