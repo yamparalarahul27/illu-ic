@@ -324,7 +324,7 @@ export default function IconsLibrary() {
             {sections.map(({ tag, items }) => (
               <div key={tag}>
                 <div style={{ display: "inline-block", marginBottom: "24px" }}>
-                  <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#6d28d9", margin: 0, letterSpacing: "-0.3px", padding: "10px 20px", backgroundColor: "#ede9fe", border: "1.5px solid #c4b5fd", borderRadius: "14px", display: "inline-block" }}>
+                  <h2 style={{ fontSize: "14px", fontWeight: 700, color: "#6d28d9", margin: 0, letterSpacing: "0.01em", padding: "8px 16px", backgroundColor: "#fff", border: "none", borderRadius: "10px", display: "inline-block", boxShadow: "0 2px 12px rgba(0,0,0,0.10)" }}>
                     {tag}
                   </h2>
                 </div>
@@ -334,7 +334,7 @@ export default function IconsLibrary() {
             {untagged.length > 0 && (
               <div>
                 <div style={{ display: "inline-block", marginBottom: "24px" }}>
-                  <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#6d28d9", margin: 0, letterSpacing: "-0.3px", padding: "10px 20px", backgroundColor: "#ede9fe", border: "1.5px solid #c4b5fd", borderRadius: "14px", display: "inline-block" }}>
+                  <h2 style={{ fontSize: "14px", fontWeight: 700, color: "#6d28d9", margin: 0, letterSpacing: "0.01em", padding: "8px 16px", backgroundColor: "#fff", border: "none", borderRadius: "10px", display: "inline-block", boxShadow: "0 2px 12px rgba(0,0,0,0.10)" }}>
                     Uncategorised
                   </h2>
                 </div>
