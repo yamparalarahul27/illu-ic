@@ -36,6 +36,7 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
   const [successMessage, setSuccessMessage] = useState("");
   const [isDarkPreview, setIsDarkPreview] = useState(isDarkView);
   const [nameCopied, setNameCopied] = useState(false);
+  const [svgCopied, setSvgCopied] = useState(false);
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
   const [nameTag, setNameTag] = useState("");
   const [savingTag, setSavingTag] = useState(false);
@@ -154,13 +155,31 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
     });
   };
 
-  const handleCopySVG = () => {
-    if (illustration.image.startsWith("data:image/svg+xml")) {
-      const svgContent = atob(illustration.image.split(",")[1]);
-      navigator.clipboard.writeText(svgContent);
-      alert("SVG copied to clipboard!");
-    } else {
-      alert("This is not an SVG file.");
+  const handleCopySVG = async () => {
+    try {
+      const src = (isDarkPreview && illustration.dark_image_url)
+        ? illustration.dark_image_url
+        : (illustration.image_url || illustration.image);
+      let svgText: string;
+      if (src && src.startsWith("data:image/svg+xml")) {
+        svgText = atob(src.split(",")[1]);
+      } else {
+        const res = await fetch(src);
+        svgText = await res.text();
+      }
+      const ta = document.createElement("textarea");
+      ta.value = svgText;
+      ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setSvgCopied(true);
+      setTimeout(() => setSvgCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy SVG failed:", err);
+      alert("Failed to copy SVG. Please try again.");
     }
   };
 
@@ -405,8 +424,8 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
 
           {/* Actions grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <button onClick={handleCopySVG} style={{ padding: "12px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--background)", color: "var(--text-primary)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-              Copy SVG
+            <button onClick={handleCopySVG} style={{ padding: "12px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--background)", color: svgCopied ? "#16a34a" : "var(--text-primary)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              {svgCopied ? "Copied!" : "Copy SVG"}
             </button>
             <button onClick={downloadSVG} style={{ padding: "12px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--background)", color: "var(--text-primary)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               Download SVG
