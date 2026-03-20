@@ -12,6 +12,7 @@ import EditAssetModal from "./components/EditAssetModal";
 import IllustrationCard from "./components/IllustrationCard";
 import SearchControlBar, { CardSize } from "./components/SearchControlBar";
 import FilterSidebar, { SortBy, ViewFilters } from "./components/FilterSidebar";
+import QuickFilterBar from "@/components/QuickFilterBar";
 import { useSession } from "@/hooks/useSession";
 import { can, NAME_TAGS } from "@/lib/permissions";
 
@@ -275,6 +276,12 @@ export default function IllustrationsLibrary() {
         role={role}
         cardSize={cardSize}
         onCardSizeChange={setCardSize}
+      />
+
+      <QuickFilterBar
+        viewFilters={viewFilters}
+        onChange={setViewFilters}
+        visible={true}
       />
 
       <h1 style={{ fontSize: "32px", fontWeight: 700, margin: "16px 0 32px", color: "var(--text-primary)" }}>

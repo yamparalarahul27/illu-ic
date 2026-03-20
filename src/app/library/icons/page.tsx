@@ -13,6 +13,7 @@ import EditAssetModal from "@/app/library/illustrations/components/EditAssetModa
 import IconCard from "./components/IconCard";
 import SearchControlBar, { CardSize } from "@/app/library/illustrations/components/SearchControlBar";
 import FilterSidebar, { SortBy, ViewFilters } from "@/app/library/illustrations/components/FilterSidebar";
+import QuickFilterBar from "@/components/QuickFilterBar";
 import { useSession } from "@/hooks/useSession";
 import { can, NAME_TAGS } from "@/lib/permissions";
 
@@ -274,6 +275,12 @@ export default function IconsLibrary() {
         cardSize={cardSize}
         onCardSizeChange={setCardSize}
         searchPlaceholder="Search icons..."
+      />
+
+      <QuickFilterBar
+        viewFilters={viewFilters}
+        onChange={setViewFilters}
+        visible={true}
       />
 
       <h1 style={{ fontSize: "32px", fontWeight: 700, margin: "16px 0 32px", color: "var(--text-primary)" }}>

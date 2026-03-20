@@ -9,7 +9,6 @@ import SidebarProfileView from "./navbar/SidebarProfileView";
 import SidebarMediaView from "./navbar/SidebarMediaView";
 import { useSession, clearAdminSession, clearUserSession, notifySessionChange } from "@/hooks/useSession";
 import { can, ROLE_CONFIG } from "@/lib/permissions";
-import { setMusicMuted, getMusicMuted } from "@/lib/musicPlayer";
 
 export default function Navbar() {
   const router = useRouter();
@@ -18,7 +17,6 @@ export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarView, setSidebarView] = useState<"menu" | "profile" | "saved" | "downloads">("menu");
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isMusicMuted, setIsMusicMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -71,7 +69,6 @@ export default function Navbar() {
     const name = editName.trim();
     const email = editEmail.trim();
 
-    // Write back to the correct session key so useSession picks it up
     const adminRaw = localStorage.getItem("graphicsLabAdminSession");
     if (adminRaw) {
       try {
@@ -117,17 +114,6 @@ export default function Navbar() {
     window.dispatchEvent(new CustomEvent("graphicsLabThemeChange", { detail: { dark: next } }));
   };
 
-  // Sync mute state from musicPlayer on mount
-  useEffect(() => {
-    setIsMusicMuted(getMusicMuted());
-  }, []);
-
-  const toggleMusic = () => {
-    const next = !isMusicMuted;
-    setIsMusicMuted(next);
-    setMusicMuted(next);
-  };
-
   const handleNavigation = (href: string) => {
     setIsLoading(true);
     setTimeout(() => { router.push(href); setIsLoading(false); }, 500);
@@ -157,7 +143,6 @@ export default function Navbar() {
               GRAPHICS LAB
             </span>
           </div>
-          {/* Role badge for admins */}
           {isAdminMode && roleCfg && (
             <span style={{
               padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: 700,
@@ -170,25 +155,6 @@ export default function Navbar() {
 
         {mounted && (
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {/* Music toggle */}
-            <button
-              onClick={toggleMusic}
-              title={isMusicMuted ? "Unmute music" : "Mute music"}
-              style={{ width: "36px", height: "36px", borderRadius: "50%", border: "1px solid var(--border-color)", backgroundColor: "var(--input-bg)", color: isMusicMuted ? "#ef4444" : "var(--text-secondary)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "all 0.2s ease", flexShrink: 0 }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "#7c3aed"; e.currentTarget.style.color = "#7c3aed"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.color = isMusicMuted ? "#ef4444" : "var(--text-secondary)"; }}
-            >
-              {isMusicMuted ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                </svg>
-              )}
-            </button>
-
             {/* Dark / Light mode toggle */}
             <button
               onClick={toggleDarkMode}
@@ -207,22 +173,22 @@ export default function Navbar() {
             {/* Profile avatar */}
             <div
               onClick={() => setIsSidebarOpen(true)}
-            style={{
-              width: "36px", height: "36px", borderRadius: "50%",
-              backgroundColor: isAdminMode ? "#7c3aed" : "#6b7280",
-              color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: displayName ? "16px" : "20px", fontWeight: 700, cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)", transition: "transform 0.2s ease",
-            }}
-            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
-            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-          >
-            {avatarInitials ? avatarInitials : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-              </svg>
-            )}
-          </div>
+              style={{
+                width: "36px", height: "36px", borderRadius: "50%",
+                backgroundColor: isAdminMode ? "#7c3aed" : "#6b7280",
+                color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: displayName ? "16px" : "20px", fontWeight: 700, cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)", transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+            >
+              {avatarInitials ? avatarInitials : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              )}
+            </div>
           </div>
         )}
       </header>

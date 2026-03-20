@@ -25,11 +25,6 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: "za", label: "Z → A" },
 ];
 
-const VIEW_OPTIONS: { key: keyof ViewFilters; label: string }[] = [
-  { key: "confirmed", label: "Confirmed" },
-  { key: "inProgress", label: "In Progress" },
-  { key: "underReview", label: "Under Review" },
-];
 
 export default function FilterSidebar({ isOpen, onClose, appliedSortBy, appliedViewFilters, onApply }: FilterSidebarProps) {
   const [sortBy, setSortBy] = useState<SortBy>(appliedSortBy);
@@ -53,10 +48,7 @@ export default function FilterSidebar({ isOpen, onClose, appliedSortBy, appliedV
     return () => document.removeEventListener("mousedown", handle);
   }, [isOpen, onClose]);
 
-  const toggleView = (key: keyof ViewFilters) =>
-    setViewFilters(prev => ({ ...prev, [key]: !prev[key] }));
-
-  const handleApply = () => { onApply(sortBy, viewFilters); onClose(); };
+const handleApply = () => { onApply(sortBy, viewFilters); onClose(); };
 
   const handleReset = () => {
     setSortBy("newest");
@@ -94,59 +86,26 @@ export default function FilterSidebar({ isOpen, onClose, appliedSortBy, appliedV
         </div>
       </div>
 
-      {/* Body — two columns */}
-      <div style={{ padding: "18px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-        {/* Sort */}
-        <div>
-          <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Sort
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {SORT_OPTIONS.map(opt => (
-              <div
-                key={opt.value}
-                onClick={() => setSortBy(opt.value)}
-                style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${sortBy === opt.value ? "#7c3aed" : "var(--border-color)"}`, backgroundColor: sortBy === opt.value ? "#f5f3ff" : "var(--input-bg)", cursor: "pointer", transition: "all 0.15s ease" }}
-              >
-                <div style={{ width: "16px", height: "16px", borderRadius: "50%", flexShrink: 0, border: `2px solid ${sortBy === opt.value ? "#7c3aed" : "var(--border-color)"}`, backgroundColor: sortBy === opt.value ? "#7c3aed" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {sortBy === opt.value && <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#fff" }} />}
-                </div>
-                <span style={{ fontSize: "13px", fontWeight: 500, color: sortBy === opt.value ? "#7c3aed" : "var(--text-primary)", userSelect: "none" }}>
-                  {opt.label}
-                </span>
+      {/* Body — sort only */}
+      <div style={{ padding: "18px 20px" }}>
+        <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          Sort
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          {SORT_OPTIONS.map(opt => (
+            <div
+              key={opt.value}
+              onClick={() => setSortBy(opt.value)}
+              style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${sortBy === opt.value ? "#7c3aed" : "var(--border-color)"}`, backgroundColor: sortBy === opt.value ? "#f5f3ff" : "var(--input-bg)", cursor: "pointer", transition: "all 0.15s ease" }}
+            >
+              <div style={{ width: "16px", height: "16px", borderRadius: "50%", flexShrink: 0, border: `2px solid ${sortBy === opt.value ? "#7c3aed" : "var(--border-color)"}`, backgroundColor: sortBy === opt.value ? "#7c3aed" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {sortBy === opt.value && <div style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#fff" }} />}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* View */}
-        <div>
-          <p style={{ margin: "0 0 10px", fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            View
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {VIEW_OPTIONS.map(opt => {
-              const active = viewFilters[opt.key];
-              return (
-                <div
-                  key={opt.key}
-                  onClick={() => toggleView(opt.key)}
-                  style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", border: `1px solid ${active ? "#7c3aed" : "var(--border-color)"}`, backgroundColor: active ? "#f5f3ff" : "var(--input-bg)", cursor: "pointer", transition: "all 0.15s ease" }}
-                >
-                  <div style={{ width: "16px", height: "16px", borderRadius: "4px", flexShrink: 0, border: `2px solid ${active ? "#7c3aed" : "var(--border-color)"}`, backgroundColor: active ? "#7c3aed" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {active && (
-                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </div>
-                  <span style={{ fontSize: "13px", fontWeight: 500, color: active ? "#7c3aed" : "var(--text-primary)", userSelect: "none" }}>
-                    {opt.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+              <span style={{ fontSize: "13px", fontWeight: 500, color: sortBy === opt.value ? "#7c3aed" : "var(--text-primary)", userSelect: "none" }}>
+                {opt.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
