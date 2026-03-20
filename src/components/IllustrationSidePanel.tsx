@@ -11,6 +11,7 @@ import { UserRole, can, STATUS_CONFIG, AssetStatus } from "@/lib/permissions";
 import TagSelector from "@/components/TagSelector";
 import { updateIllustrationStatus, updateIllustrationNameTag } from "@/lib/admin";
 import { formatIllustrationName } from "@/lib/formatName";
+import CopyToast from "@/components/CopyToast";
 
 interface IllustrationSidePanelProps {
   illustration: Illustration | null;
@@ -35,8 +36,7 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
   const [pendingReplyParentId, setPendingReplyParentId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [isDarkPreview, setIsDarkPreview] = useState(isDarkView);
-  const [nameCopied, setNameCopied] = useState(false);
-  const [svgCopied, setSvgCopied] = useState(false);
+  const [copyToast, setCopyToast] = useState<"success" | "error" | null>(null);
   const [userInfo, setUserInfo] = useState<{ name: string; email: string; team: string } | null>(null);
   const [nameTag, setNameTag] = useState("");
   const [savingTag, setSavingTag] = useState(false);
@@ -150,8 +150,8 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
       }
     }
     navigator.clipboard.writeText(displayName).then(() => {
-      setNameCopied(true);
-      setTimeout(() => setNameCopied(false), 2000);
+      setCopyToast("success");
+      setTimeout(() => setCopyToast(null), 2000);
     });
   };
 
@@ -175,8 +175,8 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      setSvgCopied(true);
-      setTimeout(() => setSvgCopied(false), 2000);
+      setCopyToast("success");
+      setTimeout(() => setCopyToast(null), 2000);
     } catch (err) {
       console.error("Copy SVG failed:", err);
       alert("Failed to copy SVG. Please try again.");
@@ -417,15 +417,12 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
             </div>
-            {nameCopied && (
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#16a34a" }}>Copied</span>
-            )}
           </div>
 
           {/* Actions grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <button onClick={handleCopySVG} style={{ padding: "12px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--background)", color: svgCopied ? "#16a34a" : "var(--text-primary)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-              {svgCopied ? "Copied!" : "Copy SVG"}
+            <button onClick={handleCopySVG} style={{ padding: "12px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--background)", color: "var(--text-primary)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              Copy SVG
             </button>
             <button onClick={downloadSVG} style={{ padding: "12px", borderRadius: "12px", border: "1px solid var(--border-color)", background: "var(--background)", color: "var(--text-primary)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
               Download SVG
@@ -594,11 +591,8 @@ export default function IllustrationSidePanel({ illustration, onClose, role = 'U
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
         }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
       `}</style>
+      <CopyToast visible={copyToast !== null} type={copyToast ?? "success"} isDark={isDarkPreview} />
     </>
   );
 }

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Icon } from "@/types/icon";
 import { STATUS_CONFIG, AssetStatus } from "@/lib/permissions";
 import { formatIllustrationName } from "@/lib/formatName";
+import CopyToast from "@/components/CopyToast";
 
 interface IconCardProps {
   icon: Icon;
@@ -18,7 +19,7 @@ interface IconCardProps {
 
 export default function IconCard({ icon, onClick, isSelected, isSelectionMode, commentCount = 0, isDarkView = false, onEditClick }: IconCardProps) {
   const [showDownloadPopup, setShowDownloadPopup] = useState(false);
-  const [svgCopied, setSvgCopied] = useState(false);
+  const [copyToast, setCopyToast] = useState<"success" | "error" | null>(null);
 
   const statusCfg = icon.status ? STATUS_CONFIG[icon.status as AssetStatus] : null;
   const displayName = formatIllustrationName(icon.name, isDarkView);
@@ -43,11 +44,20 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
         const res = await fetch(imageSrc);
         svgText = await res.text();
       }
-      await navigator.clipboard.writeText(svgText);
-      setSvgCopied(true);
-      setTimeout(() => setSvgCopied(false), 2000);
-    } catch {
-      alert("Failed to copy SVG. Please try again.");
+      const ta = document.createElement("textarea");
+      ta.value = svgText;
+      ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopyToast("success");
+      setTimeout(() => setCopyToast(null), 2000);
+    } catch (err) {
+      console.error("Copy SVG failed:", err);
+      setCopyToast("error");
+      setTimeout(() => setCopyToast(null), 2000);
     }
   };
 
@@ -199,7 +209,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
                 onMouseLeave={e => e.currentTarget.style.background = "var(--input-bg)"}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                {svgCopied ? <span style={{ color: "#16a34a" }}>Copied!</span> : "Copy SVG"}
+                Copy SVG
               </button>
               <button
                 onClick={handleDownloadSVG}
@@ -214,6 +224,7 @@ export default function IconCard({ icon, onClick, isSelected, isSelectionMode, c
           </div>
         </div>
       )}
+      <CopyToast visible={copyToast !== null} type={copyToast ?? "success"} isDark={isDarkView} />
     </>
   );
 }
