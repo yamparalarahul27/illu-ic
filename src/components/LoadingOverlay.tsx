@@ -33,7 +33,7 @@ export default function LoadingOverlay({ seconds = 1 }: LoadingOverlayProps) {
     }}>
       {/* Background image */}
       <img
-        src="/ill-loading.jpeg"
+        src="/Burj Khalifa.jpg"
         alt=""
         style={{
           position: "absolute", inset: 0,
